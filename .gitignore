@@ -1,5 +1,8 @@
 
 # ignore stuff
 
-**.sim
+*.sym
+**/*.sym
+**.sym
+
 
