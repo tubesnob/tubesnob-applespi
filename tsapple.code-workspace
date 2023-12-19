@@ -3,5 +3,10 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"workbench.sideBar.location": "right",
+		"workbench.editor.enablePreview": false,
+		"workbench.list.openMode": "doubleClick"
+	}
 }
