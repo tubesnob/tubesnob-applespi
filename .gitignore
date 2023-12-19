@@ -1,3 +1,5 @@
-*.sym
 
+# ignore stuff
+
+**.sim
 
