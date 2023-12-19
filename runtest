@@ -1,0 +1,20 @@
+
+build=$1
+if [ "$build" == "" ]; then
+    build="debug"
+fi
+export build
+
+pfolders=()
+pfolders+=("tslib")
+pfolders+=("tslib_test")
+
+mkroot=`pwd`
+
+for pf in ${pfolders[@]}; do
+	cd "$mkroot/$pf"
+	./mk $build
+	cd $mkroot
+done
+
+iix tslib_test/bin/tslib_test

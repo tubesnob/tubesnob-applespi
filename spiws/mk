@@ -1,0 +1,51 @@
+#!/bin/bash
+
+source ../mktools
+
+mk_setenv $1
+mk_setdefaults $build
+
+mk_printenv "spiws"
+
+mk_createfolders $rootdir
+
+rm -rf $libdir
+
+mk_cleanfolders $rootdir
+
+cd $srcdir
+iix compile $buildopts \
+	spiws_main.c \
+	spiws_server.c \
+	spiws_config.c \
+	spiws_init_w5500.c
+
+
+mk_movebin $srcdir $bindir
+
+cd $bindir
+iix link $linkopts \
+	spiws_main.a \
+	spiws_server.a \
+	spiws_config.a \
+	spiws_init_w5500.a \
+	../../tslib/lib/tslib \
+	../../tssocketlib/lib/tssocketlib \
+	../../tsspilib/lib/tsspilib \
+	keep=spiws
+
+cd $rootdir
+
+
+
+
+
+
+
+
+
+
+
+
+
+

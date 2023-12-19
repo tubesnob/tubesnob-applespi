@@ -1,0 +1,6 @@
+/Users/smentzer/source/applespi/test_utils/spidlhost/bin/Debug/spisocket.exe
+/Users/smentzer/source/applespi/test_utils/spidlhost/bin/Debug/spisocket.pdb
+/Users/smentzer/source/applespi/test_utils/spidlhost/obj/x86/Debug/spidlhost.csprojAssemblyReference.cache
+/Users/smentzer/source/applespi/test_utils/spidlhost/obj/x86/Debug/spidlhost.csproj.CoreCompileInputs.cache
+/Users/smentzer/source/applespi/test_utils/spidlhost/obj/x86/Debug/spisocket.exe
+/Users/smentzer/source/applespi/test_utils/spidlhost/obj/x86/Debug/spisocket.pdb

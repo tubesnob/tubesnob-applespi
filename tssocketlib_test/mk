@@ -1,0 +1,44 @@
+#!/bin/bash
+
+source ../mktools
+
+mk_setenv $1
+mk_setdefaults $build
+
+mk_printenv "tssocketlib_test"
+
+mk_createfolders $rootdir
+
+rm -rf $libdir
+
+mk_cleanfolders $rootdir
+
+cd $srcdir
+iix compile $buildopts \
+	tssocketlib_test_main.c
+
+mk_movebin $srcdir $bindir
+
+cd $bindir
+iix link $linkopts \
+	tssocketlib_test_main.a \
+	../../tslib/lib/tslib \
+	../../tssocketlib/lib/tssocketlib \
+	../../tsspilib/lib/tsspilib \
+	keep=tssocketlib_test
+
+cd $rootdir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
