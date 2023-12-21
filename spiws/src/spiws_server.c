@@ -42,7 +42,7 @@ int spiws_server_run(config_t* config) {
 
                 if (socket->listen(socket)) {
 
-                        iptostr(socket->dest_ip, __tempBuffer);
+                        iptostr(socket->dest_ip, (char*)__tempBuffer);
                         DEBUG_LOG("Connected to %s:%u\n", __tempBuffer,socket->dest_port);
                 }
 
@@ -84,12 +84,12 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
 
                 if (lineLength==1) {
 
-                        strcpy(__responseBuffer,"HTTP/1.1 200 OK\nServer: AppleSPI\n\0");
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        strcpy((char*) __responseBuffer,"HTTP/1.1 200 OK\nServer: AppleSPI\n\0");
+                        spiws_server_streamwriter(socket,__responseBuffer, (int)strlen((char*)__responseBuffer));
 
 
-                        strcpy(__responseBuffer,"Content-Type: text/html\n");
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        strcpy((char*)__responseBuffer,"Content-Type: text/html\n");
+                        spiws_server_streamwriter(socket,__responseBuffer, (int)strlen((char*)__responseBuffer));
 
                         
                         FILE* fp = fopen("index.html","r");
@@ -102,14 +102,14 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                         else
                                 DEBUG_LOG("No file\n");
                         
-                        sprintf(__responseBuffer,"Content-Length: %u\n",fileSize);
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        sprintf((char*) __responseBuffer,"Content-Length: %u\n",fileSize);
+                        spiws_server_streamwriter(socket,__responseBuffer, (int) strlen((char*)__responseBuffer));
 
-                        strcpy(__responseBuffer,"Connection: closed\n");
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        strcpy((char*)__responseBuffer,"Connection: closed\n");
+                        spiws_server_streamwriter(socket,__responseBuffer, strlen((char*)__responseBuffer));
 
-                        strcpy(__responseBuffer,"\n\n");
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        strcpy((char*)__responseBuffer,"\n\n");
+                        spiws_server_streamwriter(socket,__responseBuffer, strlen((char*)__responseBuffer));
 
                         if (fp) {
                                 while(fileSize) {
@@ -123,8 +123,8 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                         fclose(fp);
                         fp = NULL;
 
-                        strcpy(__responseBuffer,"\n\n");
-                        spiws_server_streamwriter(socket,__responseBuffer, strlen(__responseBuffer));
+                        strcpy((char*)__responseBuffer,"\n\n");
+                        spiws_server_streamwriter(socket,__responseBuffer, strlen((char*)__responseBuffer));
 
                         break;
 

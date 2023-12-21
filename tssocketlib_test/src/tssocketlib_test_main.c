@@ -14,10 +14,10 @@ int main(int argc, char** argv)
         int counter;
         int counter2;
 
-        BYTE hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
-        BYTE ipaddr[]   = { 192, 168, 100, 133 };
-        BYTE mask[]     = { 255, 255, 255, 0 };
-        BYTE gwaddr[]   = { 192, 168, 100, 254};
+        unsigned char hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
+        unsigned char ipaddr[]   = { 192, 168, 100, 133 };
+        unsigned char mask[]     = { 255, 255, 255, 0 };
+        unsigned char gwaddr[]   = { 192, 168, 100, 254};
 
         counter = 0;
         
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
         DEBUG_LOG("Setting Gateway Address\n");
         w5500_set_GWADDR(gwaddr);
 
-        BYTE rbuf[] = { 0,0,0,0,0,0 };
+        unsigned char rbuf[] = { 0,0,0,0,0,0 };
      
         socket_t* socket = NULL;
 
@@ -68,13 +68,13 @@ int main(int argc, char** argv)
 
         WORD tempSize = 0x0400;
 
-        BYTE *sendBuffer = (BYTE*) malloc(tempSize);
-        BYTE *receiveBuffer = (BYTE*) malloc(tempSize);
+        unsigned char *sendBuffer = (unsigned char*) malloc(tempSize);
+        unsigned char *receiveBuffer = (unsigned char*) malloc(tempSize);
 
-        sprintf(sendBuffer,"GET /?a=1&b=2 HTTP/1.1\nHost: www.google.com\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
+        sprintf((char*)sendBuffer,"GET /?a=1&b=2 HTTP/1.1\nHost: www.google.com\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
 
         DEBUG_LOG("sending...\n");
-        socket->send(socket, sendBuffer, strlen(sendBuffer));
+        socket->send(socket, sendBuffer, strlen((const char*)sendBuffer));
 
         waitSeconds(2);
 
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
                 memset(sendBuffer,0,tempSize);
 
                 for(int bufpos = 0; bufpos < (tempSize-1); bufpos++) {
-                        sendBuffer[bufpos] = (BYTE) (65+((longCount+bufpos)%26));
+                        sendBuffer[bufpos] = (unsigned char) (65+((longCount+bufpos)%26));
                 }
                 DEBUG_LOG("countdown=%d\n",longCount);
 
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 
                 cStart = clock();
                 time(&tStart);
-                socket->send(socket, sendBuffer, strlen(sendBuffer));
+                socket->send(socket, sendBuffer, strlen((const char*)sendBuffer));
                 cEnd = clock();
                 time(&tEnd);
 

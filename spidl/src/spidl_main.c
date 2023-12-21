@@ -68,22 +68,22 @@ int main(int argc, char** argv)
         DEBUG_LOG("Setting W5500 LAN Properties ... ");
         address_t source_hwaddr;
         strtomac(config.source_macaddr, &source_hwaddr);
-        w5500_set_SRCMAC((BYTE*) source_hwaddr);
+        w5500_set_SRCMAC((unsigned char*) source_hwaddr);
         
         address_t source_ipaddr;
         strtoip(config.source_ipaddr, &source_ipaddr);
 
-        w5500_set_SRCIP((BYTE*) source_ipaddr);
+        w5500_set_SRCIP((unsigned char*) source_ipaddr);
 
         address_t source_mask;
         strtoip(config.source_mask, &source_mask);
 
-        w5500_set_SUBMASK((BYTE*) source_mask);
+        w5500_set_SUBMASK((unsigned char*) source_mask);
         
         address_t source_gwaddr;
         strtoip(config.source_gwaddr, &source_gwaddr);
 
-        w5500_set_GWADDR((BYTE*) source_gwaddr);
+        w5500_set_GWADDR((unsigned char*) source_gwaddr);
 
         DEBUG_LOG("OK\n");
 
@@ -116,10 +116,10 @@ int main(int argc, char** argv)
 
         // send the command to the destination
         sprintf(sendCommand,"SENDFILE\n%s\n%i\n\0",config.file_name,config.packet_size);
-        socket->send(socket, sendCommand, strlen(sendCommand));
+        socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
 
         // set up a buffer to receive data...
-        BYTE* receiveBuffer = (BYTE*) malloc(BUFFER_SIZE);
+        unsigned char* receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
 
         WORD packetHeaderSize = sizeof(data_packet_t);
         WORD fixedReceiveBlockSize = packetHeaderSize + config.packet_size;
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
         //return;
 
         data_packet_t* packet = (data_packet_t*) receiveBuffer;
-        BYTE* packetData = &receiveBuffer[packetHeaderSize];
+        unsigned char* packetData = &receiveBuffer[packetHeaderSize];
 
         if (packet->packetNumber !=0) {
                 DEBUG_LOG("Invalid packet header\nExiting\n");
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
                 sprintf(sendCommand,"sendpacket\n%d\n\0",workPacketNumber);
 
                 DEBUG_LOG(">");
-                socket->send(socket, sendCommand, strlen(sendCommand));
+                socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
 
                 DEBUG_LOG("\b<");
                 socket->receive(socket,receiveBuffer,fixedReceiveBlockSize);
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
         DEBUG_LOG("\b+\n");
 
         sprintf(sendCommand,"quit\n\0");
-        socket->send(socket, sendCommand, strlen(sendCommand));
+        socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
 
         DEBUG_LOG("Cleaning Up ... ");
 

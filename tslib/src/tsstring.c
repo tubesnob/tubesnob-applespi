@@ -10,7 +10,7 @@ tsstring_t* tsstring_create(tslib_size_t initialSize) {
    tsstring_t* rv = (tsstring_t*) malloc(sizeof(tsstring_t));
    rv->f = _tsstring;
    if (initialSize>0) {
-      char *buffer = (unsigned char*) malloc(initialSize);
+      char *buffer = (char*) malloc(initialSize);
       if (buffer != NULL) {
          rv->buffersize = initialSize;
          rv->data = buffer;
@@ -19,7 +19,7 @@ tsstring_t* tsstring_create(tslib_size_t initialSize) {
    return rv;
 }
 
-tsstring_t* tsstring_create_c(const unsigned char *initString) {
+tsstring_t* tsstring_create_c(const char *initString) {
    if (initString==NULL) return NULL;
    tslib_size_t ilen = strlen(initString);
    tsstring_t* rv = _tsstring->create(ilen+1);
@@ -58,7 +58,7 @@ void          tsstring_clear(tsstring_t* self) {
 tslib_size_t  tsstring_indexof(tsstring_t* self, const char *search) {
    char* ptr = strstr(self->data, search);
    if (ptr==NULL) return -1;
-   return ptr-self->data;
+   return (tslib_size_t) (ptr - self->data);
 }
 
 tsstring_t*   tsstring_substring(tsstring_t* self, tslib_size_t start, tslib_size_t count) { 
@@ -75,9 +75,9 @@ tslist_t*  tsstring_split(tsstring_t* self, const char *splitter) {
    //printf("splitting source string [%s] based in splitter of [%s]\n", self->data, splitter);
    short idx = 0;
    short splen = strlen(splitter);
-   short slen = strlen(self->data);
+   short slen = strlen((const char*) self->data);
    int spos = 0;
-   char* sptr = self->data;
+   char* sptr = (char*) self->data;
    char* found = NULL;
    tslist_t* rv = tslist_create(8);
    do {
@@ -105,7 +105,7 @@ tslist_t*  tsstring_split(tsstring_t* self, const char *splitter) {
 
 void          tsstring_resize(tsstring_t* self, tslib_size_t count) { }
 short         tsstring_compare(tsstring_t* self, tsstring_t* other) { return 0; }
-void          tsstring_insert(tsstring_t* self, const unsigned char* insertString, tslib_size_t index) { }
+void          tsstring_insert(tsstring_t* self, char* insertString, tslib_size_t index) { }
 
 
 

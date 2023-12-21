@@ -14,9 +14,9 @@ typedef unsigned short tslib_size_t;
 // TSMEM
 //////////////////////////////////////
 typedef struct tsmem_vtbl {
-   void   (*copy)(const unsigned char *dest, const unsigned char *src, tslib_size_t count);
-   void   (*zero)(const unsigned char *dest, tslib_size_t count);
-   void   (*fill)(const unsigned char *dest, unsigned char val, tslib_size_t count);
+   void   (*copy)(const char *dest, const char *src, tslib_size_t count);
+   void   (*zero)(const char *dest, tslib_size_t count);
+   void   (*fill)(const char *dest, char val, tslib_size_t count);
    int    (*available)();
 } tsmem_vtbl_t;
 tsmem_vtbl_t* tsmem_init();
@@ -50,7 +50,7 @@ typedef struct tslist_t {
    
    void   (*add)(struct tslist_t*, void*);
    void*  (*get)(struct tslist_t*, tslib_size_t);
-   void*  (*set)(struct tslist_t*, tslib_size_t, void*);
+   void   (*set)(struct tslist_t*, tslib_size_t, void*);
    void   (*insertAt)(struct tslist_t*, tslib_size_t, void*);
    void   (*removeAt)(struct tslist_t*, tslib_size_t);
    void   (*clear)(struct tslist_t*);
@@ -66,14 +66,14 @@ tslist_t* tslist_create();
 struct tsstring_vtbl;
 typedef struct tsstring_t {
    tslib_size_t    buffersize;    // size of the string buffer
-   unsigned char*  data;          // pointer to the string buffer
+   char*  data;          // pointer to the string buffer
    struct tsstring_vtbl* f;      // pointer to the function vtable
 } tsstring_t;
 
 // tsstring function pointers vtable
 typedef struct tsstring_vtbl {
    tsstring_t*   (*create)(tslib_size_t initialSize);
-   tsstring_t*   (*create_c)(const unsigned char *initString);
+   tsstring_t*   (*create_c)(const char *initString);
    tsstring_t*   (*create_s)(tsstring_t* initString);
    tsstring_t*   (*clone)(tsstring_t* self);
    void          (*clear)(tsstring_t* self);
@@ -81,7 +81,7 @@ typedef struct tsstring_vtbl {
    tslist_t*     (*split)(tsstring_t* self, const char *splitter);
    short         (*compare)(tsstring_t* self, tsstring_t* other);
    tsstring_t*   (*substring)(tsstring_t* self, tslib_size_t start, tslib_size_t count);
-   tslib_size_t  (*indexof)(tsstring_t* self, char * search);
+   tslib_size_t  (*indexof)(tsstring_t* self, const char * search);
    void          (*free)(tsstring_t** self);
 } tsstring_vtbl_t;
 
@@ -95,7 +95,7 @@ tsstring_vtbl_t*  tsstring_init();
 void waitMilliseconds(int ms);
 void waitSeconds(int seconds);
 
-void DEBUG_LOG(const char *format, ...);
+void DEBUG_LOG(const char *fmt, ...);
 
 unsigned short gen_crc16(const unsigned char *data, unsigned short size);
 

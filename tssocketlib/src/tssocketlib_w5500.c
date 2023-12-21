@@ -8,14 +8,14 @@
 
 w5500_bsb_t _bsb;
 
-BYTE _spi_header_buffer[3];
+unsigned char _spi_header_buffer[3];
 
 #define CHECK_SOCKET_NUMBER(__x_socket_number__) { if (__x_socket_number__ >= W5500_MAX_SOCKETS) return W5500_ERR_INVALIDSOCKETNUMBER; }
 
-int w5500_write_byte(int address, BYTE bsb, BYTE data);
-int w5500_read_byte(int address, BYTE bsb, BYTE *data);
-int w5500_write_mult(int address, BYTE bsb, BYTE* data, WORD size);
-int w5500_read_mult(int address, BYTE bsb, BYTE* data, WORD size);
+int w5500_write_byte(int address, unsigned char bsb, unsigned char data);
+int w5500_read_byte(int address, unsigned char bsb, unsigned char *data);
+int w5500_write_mult(int address, unsigned char bsb, unsigned char* data, WORD size);
+int w5500_read_mult(int address, unsigned char bsb, unsigned char* data, WORD size);
 
 int w5500_init() {
 
@@ -45,7 +45,7 @@ int w5500_close() {
 }
 
 int w5500_reset() {
-        BYTE mr = 0x80;
+        unsigned char mr = 0x80;
         w5500_write_byte(W5500_ADDR_COMMON_MODE, _bsb.common_register, mr);
 
         // wait for the device to actually reset....
@@ -109,7 +109,7 @@ FT_W5500_GET_SOCKET_16(TX_WRITEPTR)
 FT_W5500_SET_SOCKET_16(TX_WRITEPTR)
 
 
-int w5500_socket_write_data(BYTE socketNumber, BYTE *buf, WORD size) {
+int w5500_socket_write_data(unsigned char socketNumber, unsigned char *buf, WORD size) {
 
         CHECK_SOCKET_NUMBER(socketNumber);
 
@@ -124,7 +124,7 @@ int w5500_socket_write_data(BYTE socketNumber, BYTE *buf, WORD size) {
 
 }
 
-int w5500_socket_read_data(BYTE socketNumber, BYTE *buf, WORD size) {
+int w5500_socket_read_data(unsigned char socketNumber, unsigned char *buf, WORD size) {
         CHECK_SOCKET_NUMBER(socketNumber);
         WORD index = 0;
         w5500_get_socket_RX_READPTR(socketNumber, &index);
@@ -140,10 +140,10 @@ LOW LEVEL STUFF BELOW HERE
 **********************
 */
 
-int w5500_write_byte(int address, BYTE bsb, BYTE data) {
+int w5500_write_byte(int address, unsigned char bsb, unsigned char data) {
         return w5500_write_mult(address, bsb, &data, 1);
 }
-int w5500_write_mult(int address, BYTE bsb, BYTE* data, WORD size) { 
+int w5500_write_mult(int address, unsigned char bsb, unsigned char* data, WORD size) { 
         
 
         _spi_header_buffer[0] = HIGH(address);
@@ -159,7 +159,7 @@ int w5500_write_mult(int address, BYTE bsb, BYTE* data, WORD size) {
 }
 
 
-int w5500_read_mult(int address, BYTE bsb, BYTE* data, WORD size) {
+int w5500_read_mult(int address, unsigned char bsb, unsigned char* data, WORD size) {
  
         _spi_header_buffer[0] = HIGH(address);
         _spi_header_buffer[1] = LOW(address);
@@ -172,7 +172,7 @@ int w5500_read_mult(int address, BYTE bsb, BYTE* data, WORD size) {
  
         return W5500_OK;
 }
-int w5500_read_byte(int address, BYTE bsb, BYTE *data) {
+int w5500_read_byte(int address, unsigned char bsb, unsigned char *data) {
         return w5500_read_mult(address, bsb, data, (WORD) 1);
 }
 
@@ -185,7 +185,7 @@ DEBUG STUFF
 
 int w5500_dump_state() {
 
-        BYTE* rbuf = (BYTE*) malloc(32);
+        unsigned char* rbuf = (unsigned char*) malloc(32);
 
         w5500_get_VERSIONR(rbuf);
         printf("W5500 Version = %d\n", rbuf[0]);

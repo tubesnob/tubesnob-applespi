@@ -8,22 +8,22 @@ int tsmem_avail() {
    return FreeMem();
 }
 
-void tsmem_copy(const unsigned char *dest, const unsigned char *src, tslib_size_t count) { 
+void tsmem_copy(const char *dest, const char *src, tslib_size_t count) { 
    printf("copying %d bytes from %x to %x\n", (int) count, (int) src, (int) dest);
-   unsigned char *dd = dest;
-   unsigned char *ss = src;
+   char *dd = (char*) dest;
+   char *ss = (char*) src;
    while(count-->0) {
       *dd++ = *src++;
    }
 }
 
-void tsmem_fill(const unsigned char *dest, unsigned char val, tslib_size_t count) { 
-   unsigned char *dd = dest;
+void tsmem_fill(const char *dest, char val, tslib_size_t count) { 
+   char *dd = (char*)dest;
    while(count-->0)
       *dd++ = val;
 }
 
-void tsmem_zero(const unsigned char *dest, tslib_size_t count) { 
+void tsmem_zero(const char *dest, tslib_size_t count) { 
    tsmem_fill(dest, 0, count);
 }
 
