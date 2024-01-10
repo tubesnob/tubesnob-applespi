@@ -34,13 +34,15 @@ int main(int argc, char** argv)
 {
         config_t config;
 
+
+
         if (ini_parse("spidl.cfg", config_handler, &config) < 0) {
-                DEBUG_LOG("Couldn't find spidl.cfg. Exiting\n");
+                printf("Couldn't find spidl.cfg. Exiting\n");
                 return 1;
         }
 
         if (argc<2) {
-                DEBUG_LOG("No parameters specified");
+                printf("No parameters specified");
                 return 1;
         }
 
@@ -48,24 +50,25 @@ int main(int argc, char** argv)
         if (argc==3) 
                 config.save_file_name = strdup(argv[2]);
 
-        DEBUG_LOG("Source\n   IP : %s\n   MAC : %s\n   Mask : %s\n   GW : %s\n",config.source_ipaddr,config.source_macaddr,config.source_mask,config.source_gwaddr);
-        DEBUG_LOG("Destination\n   IP : %s\n   Port : %i\n",config.dest_ip, config.dest_port);
-        DEBUG_LOG("Transfer\n   File Name : %s\n   Save File Name : %s\n   Packet Size : %i\n",config.file_name, config.save_file_name, config.packet_size);
+        printf("Source\n   IP : %s\n   MAC : %s\n   Mask : %s\n   GW : %s\n",config.source_ipaddr,config.source_macaddr,config.source_mask,config.source_gwaddr);
+        printf("Destination\n   IP : %s\n   Port : %i\n",config.dest_ip, config.dest_port);
+        printf("Transfer\n   File Name : %s\n   Save File Name : %s\n   Packet Size : %i\n",config.file_name, config.save_file_name, config.packet_size);
 
-
-        DEBUG_LOG("Initializing SPI ... ");
+        printf("Initializing SPI ... ");
         spi_init();
+        printf("OK\n");
 
-        DEBUG_LOG("Initializing W5500 ... ");
+        w5500_dump_state();
+ 
+        printf("Initializing W5500 ... ");
         w5500_init();
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
-
-        DEBUG_LOG("Resetting W5500 ... ");
+        printf("Resetting W5500 ... ");
         w5500_reset();
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
-        DEBUG_LOG("Setting W5500 LAN Properties ... ");
+        printf("Setting W5500 LAN Properties ... ");
         address_t source_hwaddr;
         strtomac(config.source_macaddr, &source_hwaddr);
         w5500_set_SRCMAC((unsigned char*) source_hwaddr);
@@ -85,31 +88,36 @@ int main(int argc, char** argv)
 
         w5500_set_GWADDR((unsigned char*) source_gwaddr);
 
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
         w5500_phycfg_t phy;
         w5500_get_PHYCFG(&phy);
         printf("PHY = %d\n",phy.link_status);
-        
-        DEBUG_LOG("Creating Socket ... ");
+
+        w5500_dump_state();
+
+        printf("Creating Socket ... ");
         socket_t* socket;
         socket_create(SOCKET_PROTOCOL_TCP, config.source_port, &socket);
-        DEBUG_LOG("[%d]\n",socket->number);
+        printf("[%d]\n",socket->number);
 
         strtoip(config.dest_ip, &socket->dest_ip);
         socket->dest_port = config.dest_port;
 
-        DEBUG_LOG("Connecting ...");
+        printf("Connecting ...");
         socket->connect(socket);
+
         
         // wait until we are connected...
         while (socket->status != SOCKET_STATUS_ESTABLISHED)
         {
-                DEBUG_LOG(".");
+                printf(".");
                 waitMilliseconds(100);
                 socket->refresh(socket);
         }
-        DEBUG_LOG(" Connected\n");
+        printf(" Connected\n");
+
+        dump_socketStatus(socket);        
 
         // small buffer for our send commands
         char *sendCommand = (char*) malloc(200);
@@ -117,6 +125,9 @@ int main(int argc, char** argv)
         // send the command to the destination
         sprintf(sendCommand,"SENDFILE\n%s\n%i\n\0",config.file_name,config.packet_size);
         socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
+
+        dump_socketStatus(socket);        
+
 
         // set up a buffer to receive data...
         unsigned char* receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
@@ -127,18 +138,22 @@ int main(int argc, char** argv)
         // receive a block of data...
         socket->receive(socket, receiveBuffer, fixedReceiveBlockSize);
         WORD* headerBytes = (WORD*) receiveBuffer;
+        dump_socketStatus(socket);        
 
-        //printf("Packet Header Size : %d\n",packetHeaderSize);
-        //for(int z=0; z < 16; z++) {
-        //        printf("[%d] : %x\n",z,receiveBuffer[z]);        
-        //};
-        //return;
-
+        printf("Packet Header Size : %d\n",packetHeaderSize);
+        for(int r=0; r < 4; r++) {
+                printf("[%x] ", (BYTE) r);
+                for(int z=0; z < 4; z++)  {
+                        printf("%x ",receiveBuffer[(r*4)+z]);        
+                };
+                printf("\n");
+        }
+        
         data_packet_t* packet = (data_packet_t*) receiveBuffer;
         unsigned char* packetData = &receiveBuffer[packetHeaderSize];
 
         if (packet->packetNumber !=0) {
-                DEBUG_LOG("Invalid packet header\nExiting\n");
+                printf("Invalid packet header\nExiting\n");
                 return;
         }
 
@@ -149,7 +164,7 @@ int main(int argc, char** argv)
 
         FILE* outfile = fopen(config.save_file_name,"w");
         if (!outfile) {
-                DEBUG_LOG("Could not open file [%s] for writing\nExiting\n", config.save_file_name);
+                printf("Could not open file [%s] for writing\nExiting\n", config.save_file_name);
                 return 1;
         }
 
@@ -159,48 +174,51 @@ int main(int argc, char** argv)
 
                 sprintf(sendCommand,"sendpacket\n%d\n\0",workPacketNumber);
 
-                DEBUG_LOG(">");
+                printf(">");
                 socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
 
-                DEBUG_LOG("\b<");
+                printf("\b<");
                 socket->receive(socket,receiveBuffer,fixedReceiveBlockSize);
 
-                DEBUG_LOG("\bC");
-                WORD ourCRC16 = gen_crc16(packetData, packet->packetDataLength);
+                printf("\bC");
+
+                WORD ourCRC16 = Nu_CalcCRC16((unsigned short) workPacketNumber, packetData, packet->packetDataLength);
+                //WORD ourCRC16 = gen_crc16(packetData, packet->packetDataLength);
 
                 if (packet->packetCRC16 != ourCRC16) {
                         workPacketNumber--;
-                        DEBUG_LOG("\bX\b");
+                        printf("\bX\b");
                 }
-                else {
+                else 
+                {
 
-                        DEBUG_LOG("\bW");
+                        printf("\bW");
                         fwrite(packetData, 1, packet->packetDataLength, outfile);
-                        DEBUG_LOG("\b*");
+                        printf("\b*");
 
                 }
                 workPacketNumber++;
         }
         clock_t xfer_end = clock();
 
-        DEBUG_LOG("-");
+        printf("-");
         fclose(outfile);
-        DEBUG_LOG("\b+\n");
+        printf("\b+\n");
 
         sprintf(sendCommand,"quit\n\0");
         socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
 
-        DEBUG_LOG("Cleaning Up ... ");
+        printf("Cleaning Up ... ");
 
         free(receiveBuffer);
         free(sendCommand);
         
-        DEBUG_LOG(" Done\n");
+        printf(" Done\n");
 
-        DEBUG_LOG("\nWaiting....\n");
+        printf("\nWaiting....\n");
         waitSeconds(1);
 
-        DEBUG_LOG("Done!\n");
+        printf("Done!\n");
 
         DWORD ticks = xfer_end - xfer_start;
         double totalMilliseconds = 16.6666f * ticks;

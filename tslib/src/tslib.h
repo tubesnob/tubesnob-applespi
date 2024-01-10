@@ -95,9 +95,10 @@ tsstring_vtbl_t*  tsstring_init();
 void waitMilliseconds(int ms);
 void waitSeconds(int seconds);
 
-void DEBUG_LOG(const char *fmt, ...);
+//void DEBUG_LOG(const char *fmt, ...);
 
-unsigned short gen_crc16(const unsigned char *data, unsigned short size);
+    
+unsigned short Nu_CalcCRC16(unsigned short seed, const unsigned char* ptr, int count);
 
 char *strdup(const char *s);
 
@@ -241,5 +242,3 @@ int ini_parse_string(const char* string, ini_handler handler, void* user);
 #endif
 
 #endif /* __INI_H__ */
-
-

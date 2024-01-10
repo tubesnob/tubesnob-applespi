@@ -102,12 +102,12 @@ void test_tsarray() {
         printf("inserting 0\n");
         arr->set(arr,0,"This is a test");
 
-        DEBUG_LOG("inserting 1\n");
+        printf("inserting 1\n");
         arr->set(arr,20,"This is another test");
 
         arr->resize(arr,2);
 
-        DEBUG_LOG("Starting iteration\n");
+        printf("Starting iteration\n");
         for(int index=0; index < arr->count; index++) {
                 void* item = arr->get(arr,index);
                 if (item) {

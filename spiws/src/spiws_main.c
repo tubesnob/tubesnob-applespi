@@ -9,12 +9,12 @@ int main(int argc, char** argv)
         config_t config;
 
         if (ini_parse(__spiws_config_file_name, config_handler, &config) < 0) {
-                DEBUG_LOG("Couldn't find config file [%s]\n",__spiws_config_file_name);
+                printf("Couldn't find config file [%s]\n",__spiws_config_file_name);
                 goto exiterror;
         }
 
         if (spiws_init_w5500(&config)) {
-                DEBUG_LOG("Error during w5500 initialization\n");
+                printf("Error during w5500 initialization\n");
                 goto exiterror;
         }
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
 exiterror:
 
-        DEBUG_LOG("Error. Exiting.");
+        printf("Error. Exiting.");
         return 1;
 }
 

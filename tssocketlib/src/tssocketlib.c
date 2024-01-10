@@ -98,6 +98,7 @@ static int socket_connect(socket_t* socket) {
       w5500_set_socket_DESTIP(socket->number, (unsigned char*) socket->dest_ip);
       w5500_set_socket_DESTPORT(socket->number, socket->dest_port);
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_CONNECT);
+      socket_refresh(socket);
 }
 
 static int socket_refresh(socket_t *socket) {
@@ -234,7 +235,7 @@ LISTEN FUNCTIONS
 
 
 static int socket_listen(socket_t* socket) {
-      DEBUG_LOG("Listening on port %d\n",socket->source_port);
+      printf("Listening on port %d\n",socket->source_port);
 
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_LISTEN);
 
@@ -242,7 +243,7 @@ static int socket_listen(socket_t* socket) {
       while(1) {
             w5500_get_socket_STATUS(socket->number, &socketStatus);
             if (socketStatus==W5500_SOCKET_STATUS_ESTABLISHED) {
-                  DEBUG_LOG("Connected.\n");
+                  printf("Connected.\n");
                   break;
             }
 

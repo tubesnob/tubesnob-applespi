@@ -52,7 +52,7 @@ bitloopinit     STZ workbyte
 
 bitloop         LDA >$E0C05A                    - turn sclk OFF
                 LDA >$E0C05B                    - turn sclk ON
-                LDA >$E0C060                    - get our bit
+                LDA >$E0C061                    - get our bit
                 BMI gotabit
                 BRA rotate
 
@@ -67,7 +67,7 @@ rotate		LSR mask                        - rotate it
 
 savebyte	TYA
                 LDX bufidx
-storebyte       STA >$000000,X                 - store the work byte in the buffer
+storebyte       STA >buffer,X                 - store the work byte in the buffer
                 REP #$20
                 LONGA ON
 

@@ -14,13 +14,13 @@ rm -rf $libdir
 mk_cleanfolders $rootdir
 
 cd $srcdir
-iix compile $buildopts \
+$runiix  compile $buildopts \
 	tslib_test_main.c
 
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix link $linkopts tslib_test_main.a ../../tslib/lib/tslib keep=tslib_test
+$runiix  link $linkopts tslib_test_main.a ../../tslib/lib/tslib keep=tslib_test
 
 cd $rootdir
 

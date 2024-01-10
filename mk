@@ -1,7 +1,7 @@
 
 build=$1
 if [ "$build" == "" ]; then
-    build="debug"
+    build="release"
 fi
 export build
 

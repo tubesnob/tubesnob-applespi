@@ -3,25 +3,26 @@
 function mk_setenv {
 	build=$1
 	if [ "$build" == "" ]; then
-    	build="debug"
+    	build="release"
 	fi
 	export build
 	export rootdir=`pwd`
 	export srcdir=$rootdir/src
 	export libdir=$rootdir/lib
 	export bindir=$rootdir/bin
+	export runiix="iix"
 }
 
 function mk_setdefaults {
 	#linkopts="+L +S -X"
-	linkopts="-P"
+	#linkopts=""
 	export linkopts
 	case "$1" in
-	    "release" ) buildopts="-D +O -P";;
-	    "debug" ) buildopts="+D -O -R -P";;
+	    "release" ) buildopts="+O -D -P ";;
+	    "debug" ) buildopts="+D -O -R ";;
 	esac
 	export buildopts
-	makelibopts="-P"
+	makelibopts=""
 	export makelibopts
 }
 

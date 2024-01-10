@@ -14,13 +14,13 @@ rm -rf $libdir
 mk_cleanfolders $rootdir
 
 cd $srcdir
-iix compile $buildopts \
+$runiix  compile $buildopts \
 	tssocketlib_test_main.c
 
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix link $linkopts \
+$runiix  link $linkopts \
 	tssocketlib_test_main.a \
 	../../tslib/lib/tslib \
 	../../tssocketlib/lib/tssocketlib \

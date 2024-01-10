@@ -21,34 +21,34 @@ int main(int argc, char** argv)
 
         counter = 0;
         
-        DEBUG_LOG("Initializing SPI\n");
+        printf("Initializing SPI\n");
         spi_init();
 
-        DEBUG_LOG("Initializing W5500\n");
+        printf("Initializing W5500\n");
         w5500_init();
 
-        DEBUG_LOG("Resetting W5500\n");
+        printf("Resetting W5500\n");
         w5500_reset();
 
         waitMilliseconds(1000);
 
-        DEBUG_LOG("Setting MAC\n");
+        printf("Setting MAC\n");
         w5500_set_SRCMAC(hwaddr);
 
-        DEBUG_LOG("Setting Source IP\n");
+        printf("Setting Source IP\n");
         w5500_set_SRCIP(ipaddr);
 
-        DEBUG_LOG("Setting Subnet Mask\n");
+        printf("Setting Subnet Mask\n");
         w5500_set_SUBMASK(mask);
 
-        DEBUG_LOG("Setting Gateway Address\n");
+        printf("Setting Gateway Address\n");
         w5500_set_GWADDR(gwaddr);
 
         unsigned char rbuf[] = { 0,0,0,0,0,0 };
      
         socket_t* socket = NULL;
 
-        DEBUG_LOG("Creating Socket\n");
+        printf("Creating Socket\n");
         socket_create(0x36, 8044, &socket);
 
         waitMilliseconds(1000);
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         socket->dest_ip.a3 = 196;
         socket->dest_port = 80;
 
-        DEBUG_LOG("Connecting\n");
+        printf("Connecting\n");
         socket->connect(socket);
 
         waitSeconds(2);
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
         sprintf((char*)sendBuffer,"GET /?a=1&b=2 HTTP/1.1\nHost: www.google.com\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
 
-        DEBUG_LOG("sending...\n");
+        printf("sending...\n");
         socket->send(socket, sendBuffer, strlen((const char*)sendBuffer));
 
         waitSeconds(2);
@@ -103,8 +103,8 @@ int main(int argc, char** argv)
 
         double elapsedSeconds2 = ((double) cEnd - cStart) / 60.0F;
         double bytesPerSecond = ( (double)totalBytesReceived / elapsedSeconds2);
-        DEBUG_LOG("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
-        DEBUG_LOG("Total Bytes Received = %d\n",totalBytesReceived);
+        printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
+        printf("Total Bytes Received = %d\n",totalBytesReceived);
 
         return;
 
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
                 for(int bufpos = 0; bufpos < (tempSize-1); bufpos++) {
                         sendBuffer[bufpos] = (unsigned char) (65+((longCount+bufpos)%26));
                 }
-                DEBUG_LOG("countdown=%d\n",longCount);
+                printf("countdown=%d\n",longCount);
 
                 clock_t cStart;
                 clock_t cEnd;
@@ -132,17 +132,17 @@ int main(int argc, char** argv)
                 double elapsedSeconds2 = ((double) cEnd - cStart) / 60.0F;
                 double elapsedSeconds = difftime(tEnd, tStart);
                 double bytesPerSecond = ( (double)tempSize / elapsedSeconds2);
-                DEBUG_LOG("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
+                printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
 
                 WORD receiveBytesAvailable = 0;
                 memset(receiveBuffer,0,tempSize);
 
                 socket->receive_available(socket,&receiveBytesAvailable);
 
-                DEBUG_LOG("There are %d bytes available to read\n", receiveBytesAvailable);
+                printf("There are %d bytes available to read\n", receiveBytesAvailable);
                 if (receiveBytesAvailable>tempSize) receiveBytesAvailable = tempSize-1;
                 socket->receive(socket, receiveBuffer, receiveBytesAvailable);
-                DEBUG_LOG("Received Data : %s\n", receiveBuffer);
+                printf("Received Data : %s\n", receiveBuffer);
 
                 waitSeconds(3);
 

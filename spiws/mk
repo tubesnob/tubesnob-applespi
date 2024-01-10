@@ -14,7 +14,7 @@ rm -rf $libdir
 mk_cleanfolders $rootdir
 
 cd $srcdir
-iix compile $buildopts \
+$runiix  compile $buildopts \
 	spiws_main.c \
 	spiws_server.c \
 	spiws_config.c \
@@ -24,7 +24,7 @@ iix compile $buildopts \
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix link $linkopts \
+$runiix  link $linkopts \
 	spiws_main.a \
 	spiws_server.a \
 	spiws_config.a \

@@ -19,7 +19,6 @@ namespace spidlhost
             _tcpClient.NoDelay = true;
         }
 
-
         public void DoSocketLoop() {
 
             using (Stream sstream = _tcpClient.GetStream())
@@ -40,7 +39,7 @@ namespace spidlhost
 
                         Console.WriteLine($"Command = [{command}] FileName = [{commandArgument}] PacketSize = [{packetSize}]");
 
-                        string filePath = $"/users/smentzer/source/applespi/{commandArgument}";
+                        string filePath = $"/users/smentzer/{commandArgument}";
                         if (!File.Exists(filePath))
                         {
                             Console.WriteLine($"File {filePath} doesn't exist");
@@ -58,7 +57,6 @@ namespace spidlhost
 
                         // send the initial packet...
                         SendPacketData(writer, 0, numberOfPackets, fileSize, outputDataBuffer);
-
 
                         bool doLoop = true;
                         while(doLoop)
@@ -95,63 +93,16 @@ namespace spidlhost
             _tcpClient.Close();
         }
 
-        static void SendHeaderPacket(BinaryWriter writer, uint totalNumberOfPackets, uint totalFileSize)
-        {
-            byte[] buffer = new byte[512];
-            writer.Write((UInt32)0);
-            writer.Write((UInt32)totalNumberOfPackets);
-            writer.Write((UInt32)buffer.Length);
-            writer.Write((ushort)0);
-            writer.Write(buffer);
-            writer.Flush();
-        }
-
         static void SendPacketData(BinaryWriter writer, uint packetNumber, uint totalNumberOfPackets, uint packetDataLength, byte[] packetData) {
             writer.Write((UInt32)packetNumber);
             writer.Write((UInt32)totalNumberOfPackets);
             writer.Write((UInt32)packetDataLength);
-            writer.Write((ushort)gen_crc16(packetData, (ushort) Math.Min(packetData.Length,packetDataLength)));
+            ushort crc = (ushort) new NuFXLib.CRC16().Nu_CalcCRC16((ushort)packetNumber, packetData, (ushort)Math.Min(packetData.Length, packetDataLength));
+            writer.Write(crc);
             writer.Write(packetData);
             writer.Flush();
+            Console.WriteLine($"Sending packet {packetNumber}/{totalNumberOfPackets} of length {packetDataLength} with crc {crc:X}");
         }
-
-
-        static uint gen_crc16(byte[] data, ushort size)
-        {
-            ushort crcout = 0;
-            int bits_read = 0;
-            int bit_flag = 0;
-            int pos = 0;
-
-            /* Sanity check: */
-            if(data == null)
-                return 0;
-
-            while(size > 0)
-            {
-                bit_flag = crcout >> 15;
-
-                /* Get next bit: */
-                crcout <<= 1;
-                    crcout |= (ushort)((data[pos] >> (7 - bits_read)) & 1);
-
-                /* Increment bit counter: */
-                bits_read++;
-                if(bits_read > 7)
-                {
-                    bits_read = 0;
-                    pos++;
-                    size--;
-                }
-
-                /* Cycle check: */
-                if(bit_flag!=0)
-                    crcout ^= (ushort)0x8005;
-            }
-
-            return crcout;
-        }
-
 
     }
 

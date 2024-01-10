@@ -10,7 +10,7 @@ mk_printenv "tssocketlib"
 mk_createfolders $rootdir
 
 cd $srcdir
-iix compile \
+$runiix  compile \
 	$buildopts \
 	tssocketlib.c \
 	tssocketlib_w5500.c
@@ -18,7 +18,7 @@ iix compile \
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix makelib \
+$runiix  makelib \
 	$makelibopts \
 	$libdir/tssocketlib \
 	+tssocketlib.a \

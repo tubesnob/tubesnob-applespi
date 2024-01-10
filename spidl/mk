@@ -14,13 +14,13 @@ rm -rf $libdir
 mk_cleanfolders $rootdir
 
 cd $srcdir
-iix compile $buildopts \
+$runiix  compile $buildopts \
 	spidl_main.c
 
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix link $linkopts \
+$runiix  link $linkopts \
 	spidl_main.a \
 	../../tslib/lib/tslib \
 	../../tssocketlib/lib/tssocketlib \

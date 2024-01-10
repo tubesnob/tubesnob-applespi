@@ -43,7 +43,7 @@ int spiws_server_run(config_t* config) {
                 if (socket->listen(socket)) {
 
                         iptostr(socket->dest_ip, (char*)__tempBuffer);
-                        DEBUG_LOG("Connected to %s:%u\n", __tempBuffer,socket->dest_port);
+                        printf("Connected to %s:%u\n", __tempBuffer,socket->dest_port);
                 }
 
                 spiws_server_handle(config, socket);
@@ -64,7 +64,7 @@ int spiws_server_run(config_t* config) {
 
 void spiws_server_handle(config_t* config, socket_t* socket) {
 
-        DEBUG_LOG("Handling socket %d[%d]\n",socket->id,socket->number);
+        printf("Handling socket %d[%d]\n",socket->id,socket->number);
         
         int lineCount=0;
 
@@ -73,13 +73,13 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                 socket->refresh(socket);
 
                 if (socket->status != SOCKET_STATUS_ESTABLISHED) {
-                        DEBUG_LOG("Socket is no longer connected.\n");
+                        printf("Socket is no longer connected.\n");
                         break;
                 }
 
                 int lineLength = spiws_server_streamreader(socket, __lineBuffer, LINE_BUFFER_SIZE);
                 if (lineLength) {
-                        //DEBUG_LOG("[%u:%u:%u] : %s",lineCount++,lineLength,__lineBuffer[0],__lineBuffer);
+                        //printf("[%u:%u:%u] : %s",lineCount++,lineLength,__lineBuffer[0],__lineBuffer);
                 }
 
                 if (lineLength==1) {
@@ -100,7 +100,7 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                                 fseek(fp, 0, SEEK_SET); // seek back to beginning of file         
                         }
                         else
-                                DEBUG_LOG("No file\n");
+                                printf("No file\n");
                         
                         sprintf((char*) __responseBuffer,"Content-Length: %u\n",fileSize);
                         spiws_server_streamwriter(socket,__responseBuffer, (int) strlen((char*)__responseBuffer));
@@ -139,10 +139,10 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
         BYTE* end = &__requestBuffer[REQUEST_BUFFER_SIZE];
 
         if (socket->rx_bytes_available) {
-                //DEBUG_LOG("reading %u bytes\n",socket->rx_bytes_available);
+                //printf("reading %u bytes\n",socket->rx_bytes_available);
                 if (__requestBufferPos + socket->rx_bytes_available > end) return 0;
                 WORD bytesRead = socket->receive(socket, __requestBufferPos, socket->rx_bytes_available);
-                //DEBUG_LOG("read %u bytes\n",bytesRead);
+                //printf("read %u bytes\n",bytesRead);
                 __requestBufferPos += bytesRead;
         }
 
@@ -150,11 +150,11 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
         BYTE* xxx = __streamReaderPos;
         BYTE counter = 0;
         while(xxx < __requestBufferPos && counter < 10) {
-                DEBUG_LOG("[%u]",*xxx);
+                printf("[%u]",*xxx);
                 xxx++;
                 counter++;
         }
-        DEBUG_LOG("\n***************\n");
+        printf("\n***************\n");
         */
 
         // do we have any data to process?
@@ -189,7 +189,7 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
 
 
 int  spiws_server_streamwriter(socket_t* socket, BYTE* buffer, int size) {
-        //DEBUG_LOG("[SEND] %s\n",buffer);
+        //printf("[SEND] %s\n",buffer);
         socket->send(socket,buffer,size);
 }
 

@@ -12,19 +12,20 @@ mk_createfolders $rootdir
 mk_cleanfolders $rootdir
 
 cd $srcdir
-iix compile \
+$runiix compile \
 	$buildopts \
 	ini.c \
 	utils.c \
 	tsarray.c \
 	tslist.c \
 	tsstring.c \
-	tsmem.c
+	tsmem.c \
+	nucrc16.c
 
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix makelib \
+$runiix makelib \
 	$makelibopts \
 	$libdir/tslib \
 	+tsarray.a \
@@ -32,7 +33,8 @@ iix makelib \
 	+ini.a \
 	+utils.a \
 	+tsstring.a \
-	+tsmem.a
+	+tsmem.a \
+	+nucrc16.a
 	
 	
 cp $srcdir/*.h $libdir

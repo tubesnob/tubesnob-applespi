@@ -16,6 +16,13 @@
 #define A2_AN3_OFF  0xc05e
 #define A2_AN3_ON   0xc05f
 #define A2_PB3      0xc060
+#define A2_PB0      0xc061
+#define A2_PB1      0xc062
+#define A2_PB2      0xc063
+#define A2_PDL1X    0xc064
+#define A2_PDL1Y    0xc065
+#define A2_PDL2X    0xc066
+#define A2_PDL2Y    0xc067
 
 #define SSEL_OFF (*((BYTE*)A2_AN0_OFF)  = (BYTE)0xA0)
 #define SSEL_ON  (*((BYTE*)A2_AN0_ON)   = (BYTE)0xA0)
@@ -23,7 +30,7 @@
 #define SCLK_ON  (*((BYTE*)A2_AN1_ON)   = (BYTE)0xA0)
 #define MOSI_OFF (*((BYTE*)A2_AN3_OFF)  = (BYTE)0xA0)
 #define MOSI_ON  (*((BYTE*)A2_AN3_ON)   = (BYTE)0xA0)
-#define MISO_GET ((BYTE)(*((BYTE*)A2_PB3)))
+#define MISO_GET ((BYTE)(*((BYTE*)A2_PB0)))
 
  unsigned short spisendb(BYTE *buffer, WORD numberOfBytes);
  unsigned short spireadb(BYTE *buffer, WORD numberOfBytes);

@@ -28,11 +28,18 @@ int w5500_init() {
 
    w5500_reset();
 
+        //w5500_phycfg_t phycfg;
+        //phycfg.opmode_set = 1;
+        //phycfg.opmode = W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO;
+        //w5500_set_PHYCFG(phycfg);
+
    for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
         w5500_set_socket_INTERRUPT(socketNumber, 0xFF);         // reset the interrupt register
         w5500_set_socket_INTMASK(socketNumber, 0xFF);           // set the interrupt mask register to trigger all interrupts
         w5500_set_socket_TX_BUFSIZE(socketNumber, 0x02);        // set the tx buffer to 2k
         w5500_set_socket_RX_BUFSIZE(socketNumber, 0x02);        // set the rx buffer to 2k
+        w5500_set_socket_MODE(socketNumber, W5500_SOCKET_MODE_CLOSE);
+        w5500_set_socket_COMMAND(socketNumber, W5500_SOCKET_CMD_DISCON); // make sure all sockets are closed
         w5500_set_socket_COMMAND(socketNumber, W5500_SOCKET_CMD_CLOSE); // make sure all sockets are closed
    }
 
@@ -187,6 +194,8 @@ int w5500_dump_state() {
 
         unsigned char* rbuf = (unsigned char*) malloc(32);
 
+        printf("###### W5500 STATUS DUMP ######\n");
+        
         w5500_get_VERSIONR(rbuf);
         printf("W5500 Version = %d\n", rbuf[0]);
 
@@ -243,5 +252,31 @@ int w5500_dump_state() {
                 default : printf("UNKNOWN\n"); break;
         }
 
+
+        for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
+                printf("[S%d]: ", socketNumber);
+                w5500_get_socket_STATUS(socketNumber, rbuf);
+                switch(rbuf[0]) {
+                        case W5500_SOCKET_STATUS_CLOSED: printf("W5500_SOCKET_STATUS_CLOSED\n"); break;
+                        case W5500_SOCKET_STATUS_INIT: printf("W5500_SOCKET_STATUS_INIT\n"); break;
+                        case W5500_SOCKET_STATUS_LISTEN: printf("W5500_SOCKET_STATUS_LISTEN\n"); break;
+                        case W5500_SOCKET_STATUS_SYNSENT: printf("W5500_SOCKET_STATUS_SYNSENT\n"); break;
+                        case W5500_SOCKET_STATUS_SYNRECV: printf("W5500_SOCKET_STATUS_SYNRECV\n"); break;
+                        case W5500_SOCKET_STATUS_ESTABLISHED: printf("W5500_SOCKET_STATUS_ESTABLISHED\n"); break;
+                        case W5500_SOCKET_STATUS_FIN_WAIT: printf("W5500_SOCKET_STATUS_FIN_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_CLOSING: printf("W5500_SOCKET_STATUS_CLOSING\n"); break;
+                        case W5500_SOCKET_STATUS_TIME_WAIT: printf("W5500_SOCKET_STATUS_TIME_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_CLOSE_WAIT: printf("W5500_SOCKET_STATUS_CLOSE_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_LAST_ACK: printf("W5500_SOCKET_STATUS_LAST_ACK\n"); break;
+                        case W5500_SOCKET_STATUS_UDP: printf("W5500_SOCKET_STATUS_UDP\n"); break;
+                        case W5500_SOCKET_STATUS_IPRAW: printf("W5500_SOCKET_STATUS_IPRAW\n"); break;
+                        case W5500_SOCKET_STATUS_MACRAW: printf("W5500_SOCKET_STATUS_MACRAW\n"); break;
+                        case W5500_SOCKET_STATUS_PPPOE: printf("W5500_SOCKET_STATUS_PPPOE\n"); break;
+                }
+        }
+
         free(rbuf);
+
+        printf("###########################\n");
+        
 }

@@ -10,14 +10,14 @@ mk_printenv "tsspilib"
 mk_createfolders $rootdir
 
 cd $srcdir
-iix compile $buildopts tsspilib.c
-iix compile $buildopts tsspilib_asm_spireadb.asm
-iix compile $buildopts tsspilib_asm_spisendb.asm
+$runiix  compile $buildopts tsspilib.c
+$runiix  compile $buildopts tsspilib_asm_spireadb.asm
+$runiix  compile $buildopts tsspilib_asm_spisendb.asm
 
 mk_movebin $srcdir $bindir
 
 cd $bindir
-iix makelib \
+$runiix  makelib \
 	$makelibopts \
 	$libdir/tsspilib \
 	+tsspilib.a \

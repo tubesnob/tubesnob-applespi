@@ -6,18 +6,18 @@
 int spiws_init_w5500(config_t* config)
 {
 
-        DEBUG_LOG("Initializing SPI ... \n");
+        printf("Initializing SPI ... \n");
         spi_init();
 
-        DEBUG_LOG("Initializing W5500 ... ");
+        printf("Initializing W5500 ... ");
         w5500_init();
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
-        DEBUG_LOG("Resetting W5500 ... ");
+        printf("Resetting W5500 ... ");
         w5500_reset();
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
-        DEBUG_LOG("Setting W5500 LAN Properties ... ");
+        printf("Setting W5500 LAN Properties ... ");
         address_t source_hwaddr;
         strtomac(config->source_macaddr, &source_hwaddr);
         w5500_set_SRCMAC((BYTE*) source_hwaddr);
@@ -37,7 +37,7 @@ int spiws_init_w5500(config_t* config)
 
         w5500_set_GWADDR((BYTE*) source_gwaddr);
 
-        DEBUG_LOG("OK\n");
+        printf("OK\n");
 
         w5500_phycfg_t phy;
         w5500_get_PHYCFG(&phy);

@@ -1,7 +1,7 @@
 
 build=$1
 if [ "$build" == "" ]; then
-    build="debug"
+    build="release"
 fi
 export build
 
@@ -17,4 +17,4 @@ for pf in ${pfolders[@]}; do
 	cd $mkroot
 done
 
-iix tslib_test/bin/tslib_test
+$runiix tslib_test/bin/tslib_test
