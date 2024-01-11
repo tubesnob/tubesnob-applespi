@@ -93,7 +93,7 @@ int main(int argc, char** argv)
         printf("Creating Socket ... ");
         socket_t* socket;
         socket_create(SOCKET_PROTOCOL_TCP, config.source_port, &socket);
-        printf("[%d]\n",socket->number);
+        printf("[%d]\n",(unsigned short)socket->number);
 
         strtoip(config.dest_ip, &socket->dest_ip);
         socket->dest_port = config.dest_port;
