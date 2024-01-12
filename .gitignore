@@ -4,10 +4,12 @@
 *.sym
 **/*.sym
 **.sym
-
+**/obj/
 **/obj/*
 **/bin/*
+**/bin/
 **/lib/*
+**/lib/
 **/.vs
 
 

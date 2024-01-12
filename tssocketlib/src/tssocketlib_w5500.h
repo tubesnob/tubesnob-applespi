@@ -1,3 +1,5 @@
+#include "../../orcadefaults.h"
+
 #ifndef __TSSOCKETLIB_W5500_DOT_H__
 #define __TSSOCKETLIB_W5500_DOT_H__
 

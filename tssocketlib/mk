@@ -15,6 +15,12 @@ $runiix  compile \
 	tssocketlib.c \
 	tssocketlib_w5500.c
 
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 mk_movebin $srcdir $bindir
 
 cd $bindir
@@ -23,6 +29,12 @@ $runiix  makelib \
 	$libdir/tssocketlib \
 	+tssocketlib.a \
 	+tssocketlib_w5500.a
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 cp $srcdir/tssocketlib.h $libdir
 cp $srcdir/tssocketlib_w5500.h $libdir

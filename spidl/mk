@@ -17,6 +17,12 @@ cd $srcdir
 $runiix  compile $buildopts \
 	spidl_main.c
 
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 mk_movebin $srcdir $bindir
 
 cd $bindir
@@ -26,6 +32,12 @@ $runiix  link $linkopts \
 	../../tssocketlib/lib/tssocketlib \
 	../../tsspilib/lib/tsspilib \
 	keep=spidl
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 cd $rootdir
 

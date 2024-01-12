@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../../orcadefaults.h"
 #include "../../tslib/lib/tslib.h"
 #include "../../tsspilib/lib/tsspilib.h"
 #include "../../tssocketlib/lib/tssocketlib.h"
@@ -8,11 +9,6 @@
 #ifndef __TSSOCKETLIB_TEST_DOT_H__
 #define __TSSOCKETLIB_TEST_DOT_H__
 
-#define BYTE unsigned char
-#define WORD unsigned short
-#define DWORD unsigned int
-
 void dump_socketStatus(socket_t* socket);
-
 
 #endif

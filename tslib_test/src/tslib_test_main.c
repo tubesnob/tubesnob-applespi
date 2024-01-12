@@ -16,13 +16,11 @@ int main(int argc, char** argv)
 {
    _tsmem = tsmem_init();
    _tsstring = tsstring_init();
-
-        while(1) {
-   test_tsstring();
-   test_tslist();
-   test_tsarray();        
-
-        }
+    while(1) {
+        test_tsstring();
+        test_tslist();
+        test_tsarray();        
+    }
 }
 
 void test_tsstring() {
@@ -33,7 +31,7 @@ void test_tsstring() {
         
         for(int scount = 0; scount < vl->count; scount++) {
                 tsstring_t* seg = vl->get(vl, scount);
-                printf("Segment #%d is [%s]\n",scount, seg->data);
+                printf("Segment #%i is [%s]\n",scount, seg->data);
                 seg->f->free(&seg);
         };
         //vl->free(vl);
@@ -55,7 +53,7 @@ void test_tsstring() {
 
 
         tslib_size_t idx = v1->f->indexof(v1,"emergency");
-        printf("Index of = %d\n", idx);
+        printf("Index of = %i\n", idx);
 
         tsstring_t* v4 = v1->f->substring(v1, idx, 4);
         printf("Sub of index = %s\n", v4->data);

@@ -86,7 +86,7 @@ tslist_t*  tsstring_split(tsstring_t* self, const char *splitter) {
       idx = -1;
       if (found) {
          idx = found - sptr;
-         printf("found splitter at index %d\n", idx);
+         printf("found splitter at index %i\n", idx);
          tsstring_t* item = self->f->substring(self,spos,idx);
          printf("segment is [%s]\n", item->data);
          rv->add(rv, item);
@@ -99,7 +99,7 @@ tslist_t*  tsstring_split(tsstring_t* self, const char *splitter) {
       tsstring_t* last = self->f->substring(self, spos, slen-spos);
       rv->add(rv, last);
    }
-   printf("returning %d segments\n",(int)rv->count);
+   printf("returning %i segments\n",(int)rv->count);
    return rv;
 }
 

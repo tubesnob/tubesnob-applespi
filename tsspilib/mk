@@ -11,8 +11,29 @@ mk_createfolders $rootdir
 
 cd $srcdir
 $runiix  compile $buildopts tsspilib.c
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 $runiix  compile $buildopts tsspilib_asm_spireadb.asm
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 $runiix  compile $buildopts tsspilib_asm_spisendb.asm
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 
 mk_movebin $srcdir $bindir
 
@@ -23,6 +44,12 @@ $runiix  makelib \
 	+tsspilib.a \
 	+tsspilib_asm_spisendb.ROOT \
 	+tsspilib_asm_spireadb.ROOT 
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 cp $srcdir/tsspilib.h $libdir
 cd $rootdir

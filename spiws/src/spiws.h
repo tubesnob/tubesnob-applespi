@@ -12,10 +12,6 @@
 #ifndef __SPIWS_DOT_H__
 #define __SPIWS_DOT_H__
 
-#define BYTE unsigned char
-#define WORD unsigned short
-#define DWORD unsigned int
-
 typedef struct {
         char *source_macaddr;
         char *source_ipaddr;
@@ -27,9 +23,9 @@ typedef struct {
 
 
 typedef struct {
-   BYTE* method;
-   BYTE* uri;
-   BYTE* protocol;
+   uint8_t* method;
+   uint8_t* uri;
+   uint8_t* protocol;
 } http_request;
 
 int config_handler(void* user, const char* section, const char* name, const char* value);

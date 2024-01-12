@@ -19,5 +19,14 @@ mkroot=`pwd`
 for pf in ${pfolders[@]}; do
 	cd "$mkroot/$pf"
 	./mk $build
+
+	if [[ "$?" != "0" ]] 
+	then
+		echo "ERROR BUILDING OR LINKING : $pf"
+		break
+	fi
 	cd $mkroot
 done
+
+cd $mkroot
+

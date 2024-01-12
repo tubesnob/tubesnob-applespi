@@ -11,17 +11,17 @@
 #define C_CR 10
 #define C_LF 13
 
-BYTE    __tempBuffer[255];
-BYTE*   __requestBufferPos;
-BYTE*   __streamReaderPos;
-BYTE*   __requestBuffer;
-BYTE*   __lineBuffer;
-BYTE*   __responseBuffer;
-BYTE*   __fileBuffer;
+uint8_t    __tempBuffer[255];
+uint8_t*   __requestBufferPos;
+uint8_t*   __streamReaderPos;
+uint8_t*   __requestBuffer;
+uint8_t*   __lineBuffer;
+uint8_t*   __responseBuffer;
+uint8_t*   __fileBuffer;
 
 void spiws_server_handle(config_t* config, socket_t* socket);
-int  spiws_server_streamreader(socket_t* socket, BYTE* textBuffer, int size);
-int  spiws_server_streamwriter(socket_t* socket, BYTE* buffer, int size);
+int  spiws_server_streamreader(socket_t* socket, uint8_t* textBuffer, int size);
+int  spiws_server_streamwriter(socket_t* socket, uint8_t* buffer, int size);
 
 int spiws_server_run(config_t* config) {
 
@@ -37,8 +37,7 @@ int spiws_server_run(config_t* config) {
 
         while(1) {
 
-                socket_t* socket;
-                socket_create(SOCKET_PROTOCOL_TCP, config->source_listenport, &socket);
+                socket_t* socket = socket_create(SOCKET_PROTOCOL_TCP, config->source_listenport);
 
                 if (socket->listen(socket)) {
 
@@ -64,7 +63,7 @@ int spiws_server_run(config_t* config) {
 
 void spiws_server_handle(config_t* config, socket_t* socket) {
 
-        printf("Handling socket %d[%d]\n",socket->id,socket->number);
+        printf("Handling socket %i[%i]\n",socket->id,socket->number);
         
         int lineCount=0;
 
@@ -134,21 +133,21 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
 
 }
 
-int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
+int spiws_server_streamreader(socket_t* socket, uint8_t *linebuffer, int size) {
 
-        BYTE* end = &__requestBuffer[REQUEST_BUFFER_SIZE];
+        uint8_t* end = &__requestBuffer[REQUEST_BUFFER_SIZE];
 
         if (socket->rx_bytes_available) {
                 //printf("reading %u bytes\n",socket->rx_bytes_available);
                 if (__requestBufferPos + socket->rx_bytes_available > end) return 0;
-                WORD bytesRead = socket->receive(socket, __requestBufferPos, socket->rx_bytes_available);
+                uint16_t bytesRead = socket->receive(socket, __requestBufferPos, socket->rx_bytes_available);
                 //printf("read %u bytes\n",bytesRead);
                 __requestBufferPos += bytesRead;
         }
 
         /*
-        BYTE* xxx = __streamReaderPos;
-        BYTE counter = 0;
+        uint8_t* xxx = __streamReaderPos;
+        uint8_t counter = 0;
         while(xxx < __requestBufferPos && counter < 10) {
                 printf("[%u]",*xxx);
                 xxx++;
@@ -160,8 +159,8 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
         // do we have any data to process?
         if (__streamReaderPos >= __requestBufferPos) return 0;
 
-        BYTE *tp = __streamReaderPos;
-        BYTE c = *tp;
+        uint8_t *tp = __streamReaderPos;
+        uint8_t c = *tp;
 
         // if we have a null at the position, and there is data ahead of us... ignore it and move on.
         if (c==0) {
@@ -177,7 +176,7 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
 
         // if we found a carriage return, copy the data into the line buffer and update our stream reader position
         if (c==C_CR) {
-                WORD length = tp - __streamReaderPos;
+                uint16_t length = tp - __streamReaderPos;
                 memcpy(__lineBuffer, __streamReaderPos, length);
                 __lineBuffer[length] = 0x00;
                 __streamReaderPos = tp;
@@ -188,7 +187,7 @@ int spiws_server_streamreader(socket_t* socket, BYTE *linebuffer, int size) {
 }
 
 
-int  spiws_server_streamwriter(socket_t* socket, BYTE* buffer, int size) {
+int  spiws_server_streamwriter(socket_t* socket, uint8_t* buffer, int size) {
         //printf("[SEND] %s\n",buffer);
         socket->send(socket,buffer,size);
 }

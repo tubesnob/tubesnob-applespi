@@ -1,12 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "tssocketlib.h"
 #include "tssocketlib_w5500.h"
-#include "../../orcadefaults.h"
-#pragma noroot
 
-#define NULL 0
-
-socket_t   __sockets[W5500_MAX_SOCKETS];
-unsigned int      __socket_id = 0;        // running list of socket numbers. used to provide each with a unique ID over time
+static socket_t   __sockets[W5500_MAX_SOCKETS];
+static unsigned int      __socket_id = 0;        // running list of socket numbers. used to provide each with a unique ID over time
 
 
 static int socket_close(socket_t* socket);
@@ -27,17 +26,17 @@ void socket_init() {
       }      
 }
 
-int socket_create(unsigned char protocol, unsigned short source_port, socket_t** socket)
+socket_t* socket_create(unsigned char protocol, unsigned short source_port)
 {
 
    unsigned char sn = 0;
    unsigned char status = 0;
 
-   *socket = NULL;
-
    // find a socket that is closed ....
    for(sn=0; sn < W5500_MAX_SOCKETS; sn++) {
+      printf("Getting status of socket %i : ",sn);
       w5500_get_socket_STATUS(sn, &status);
+      printf("%X\n",status);
       if (status==W5500_SOCKET_STATUS_CLOSED) 
          break;
    };
@@ -45,24 +44,37 @@ int socket_create(unsigned char protocol, unsigned short source_port, socket_t**
    // if we went past our maximum number of sockets, none are available
    // clean up any sockets eligible for closure
    if (sn >= W5500_MAX_SOCKETS) {
+         printf("No sockets available. Trying to close one.\n");
          unsigned char found = 0;
          unsigned char status;
          for(sn=0; sn < W5500_MAX_SOCKETS && !found; sn++) {
+
+            printf("Checking closed status of socket %i : ");
+
             w5500_get_socket_STATUS(sn, &status);
             switch(status) {
                   case W5500_SOCKET_STATUS_LAST_ACK:
                   case W5500_SOCKET_STATUS_TIME_WAIT:
                   case W5500_SOCKET_STATUS_FIN_WAIT:
                   case W5500_SOCKET_STATUS_CLOSING:
+                        printf("CAN BE CLOSED! CLOSING! ... ");
                         w5500_set_socket_COMMAND(sn, W5500_SOCKET_CMD_CLOSE);
                         found = 1;
+                        printf("CLOSED");
                         break;
+                  default:
+                        printf("N/A\n");
+
             }
          }
+
+         printf("Socket scan complete. Found = %i. SN = %i\n",found,sn);
    }
 
-   if (sn >= W5500_MAX_SOCKETS)
-      return SOCKET_NORESOURCES;
+   if (sn >= W5500_MAX_SOCKETS) {
+      printf("NO SOCKETS AVAILABLE ERROR!");
+      return ;
+   }
 
    socket_t* ss = (socket_t*) malloc(sizeof(socket_t));
    ss->id = __socket_id++;
@@ -70,8 +82,10 @@ int socket_create(unsigned char protocol, unsigned short source_port, socket_t**
    ss->source_port = source_port;
    ss->protocol = protocol; 
 
-   ss->close = &socket_close;
+   //printf("New socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
+
    ss->connect = &socket_connect;
+   ss->close = &socket_close;
    ss->disconnect = &socket_disconnect;
    ss->listen = &socket_listen; 
    ss->send = &socket_send;
@@ -79,13 +93,14 @@ int socket_create(unsigned char protocol, unsigned short source_port, socket_t**
    ss->receive = &socket_receive;
    ss->refresh = &socket_refresh;
 
+   //printf("Mid assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
    w5500_set_socket_SRCPORT(ss->number, ss->source_port);
    w5500_set_socket_MODE(ss->number, W5500_SOCKET_MODE_TCP);
    w5500_set_socket_COMMAND(ss->number, W5500_SOCKET_CMD_OPEN);
-   
-   *socket = ss;
 
-   return SOCKET_OK;
+   //printf("Final assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
+
+   return ss;
    
 } 
 
@@ -235,7 +250,7 @@ LISTEN FUNCTIONS
 
 
 static int socket_listen(socket_t* socket) {
-      printf("Listening on port %d\n",socket->source_port);
+      printf("Listening on port %i\n",socket->source_port);
 
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_LISTEN);
 
@@ -268,7 +283,7 @@ UTILITY FUNCTIONS
 
 
 char* iptostr(address_t ip, char* buf) {
-      sprintf(buf, "%d.%d.%d.%d\0", ip.a0, ip.a1, ip.a2, ip.a3);
+      sprintf(buf, "%i.%i.%i.%i\0", ip.a0, ip.a1, ip.a2, ip.a3);
       return buf;
 }
 
@@ -317,7 +332,7 @@ void dump_socketStatus(socket_t* socket)
 {
         unsigned char socketStatus = 0;
         w5500_get_socket_STATUS(socket->number, &socketStatus);
-        printf("Socket [%d]\n",socket->number);
+        printf("Socket [%i]\n",socket->number);
         printf("  STATUS = ");
         switch(socketStatus) {
                 case W5500_SOCKET_STATUS_CLOSED:      printf("CLOSED\n"); break;
@@ -344,7 +359,7 @@ void dump_socketStatus(socket_t* socket)
 
         unsigned short source_port;
         w5500_get_socket_SRCPORT(socket->number, &source_port);
-        printf("  SOURCE PORT = %d\n",source_port);
+        printf("  SOURCE PORT = %i\n",source_port);
 
         address_t dest_ip;
         w5500_get_socket_DESTIP(socket->number, (unsigned char*) &dest_ip);
@@ -355,7 +370,7 @@ void dump_socketStatus(socket_t* socket)
         
         unsigned short dest_port;
         w5500_get_socket_DESTPORT(socket->number, &dest_port);
-        printf("  DEST PORT = %d\n",dest_port);
+        printf("  DEST PORT = %i\n",dest_port);
 
 }
 

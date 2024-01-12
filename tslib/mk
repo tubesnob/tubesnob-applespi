@@ -22,6 +22,12 @@ $runiix compile \
 	tsmem.c \
 	nucrc16.c
 
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 mk_movebin $srcdir $bindir
 
 cd $bindir
@@ -36,6 +42,11 @@ $runiix makelib \
 	+tsmem.a \
 	+nucrc16.a
 	
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 	
 cp $srcdir/*.h $libdir
 

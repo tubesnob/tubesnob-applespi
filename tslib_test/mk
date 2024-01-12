@@ -17,10 +17,22 @@ cd $srcdir
 $runiix  compile $buildopts \
 	tslib_test_main.c
 
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
+
 mk_movebin $srcdir $bindir
 
 cd $bindir
 $runiix  link $linkopts tslib_test_main.a ../../tslib/lib/tslib keep=tslib_test
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 cd $rootdir
 

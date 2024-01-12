@@ -1,23 +1,16 @@
 #include <stdio.h>
 
 #include "tssocketlib_test.h"
-#include "../../tslib/lib/tslib.h"
-#include "../../tsspilib/lib/tsspilib.h"
-#include "../../tssocketlib/lib/tssocketlib.h"
-#include "../../tssocketlib/lib/tssocketlib_w5500.h"
-
-#include "../../orcadefaults.h"
-
 
 int main(int argc, char** argv)
 {
         int counter;
         int counter2;
 
-        unsigned char hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
-        unsigned char ipaddr[]   = { 192, 168, 100, 133 };
-        unsigned char mask[]     = { 255, 255, 255, 0 };
-        unsigned char gwaddr[]   = { 192, 168, 100, 254};
+        uint8_t hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
+        uint8_t ipaddr[]   = { 192, 168, 100, 133 };
+        uint8_t mask[]     = { 255, 255, 255, 0 };
+        uint8_t gwaddr[]   = { 192, 168, 100, 254};
 
         counter = 0;
         
@@ -44,12 +37,10 @@ int main(int argc, char** argv)
         printf("Setting Gateway Address\n");
         w5500_set_GWADDR(gwaddr);
 
-        unsigned char rbuf[] = { 0,0,0,0,0,0 };
+        uint8_t rbuf[] = { 0,0,0,0,0,0 };
      
-        socket_t* socket = NULL;
-
         printf("Creating Socket\n");
-        socket_create(0x36, 8044, &socket);
+        socket_t* socket = socket_create(0x36, 8044);
 
         waitMilliseconds(1000);
 
@@ -66,10 +57,10 @@ int main(int argc, char** argv)
         waitSeconds(2);
         dump_socketStatus(socket);
 
-        WORD tempSize = 0x0400;
+        uint16_t tempSize = 0x0400;
 
-        unsigned char *sendBuffer = (unsigned char*) malloc(tempSize);
-        unsigned char *receiveBuffer = (unsigned char*) malloc(tempSize);
+        uint8_t *sendBuffer = (uint8_t*) malloc(tempSize);
+        uint8_t *receiveBuffer = (uint8_t*) malloc(tempSize);
 
         sprintf((char*)sendBuffer,"GET /?a=1&b=2 HTTP/1.1\nHost: www.google.com\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
 
@@ -78,7 +69,7 @@ int main(int argc, char** argv)
 
         waitSeconds(2);
 
-        WORD receiveBytesAvailable = 0;
+        uint16_t receiveubytesAvailable = 0;
 
         clock_t cStart;
         clock_t cEnd;
@@ -90,21 +81,21 @@ int main(int argc, char** argv)
 
         int totalBytesReceived = 0;
         do {
-                socket->receive_available(socket,&receiveBytesAvailable);
-                if (receiveBytesAvailable>tempSize) receiveBytesAvailable = tempSize-1;
+                socket->receive_available(socket,&receiveubytesAvailable);
+                if (receiveubytesAvailable>tempSize) receiveubytesAvailable = tempSize-1;
                 memset(receiveBuffer,0,tempSize);
-                socket->receive(socket, receiveBuffer, receiveBytesAvailable);
-                totalBytesReceived += receiveBytesAvailable;
-        } while (receiveBytesAvailable);
+                socket->receive(socket, receiveBuffer, receiveubytesAvailable);
+                totalBytesReceived += receiveubytesAvailable;
+        } while (receiveubytesAvailable);
 
  
         cEnd = clock();
         time(&tEnd);
 
         double elapsedSeconds2 = ((double) cEnd - cStart) / 60.0F;
-        double bytesPerSecond = ( (double)totalBytesReceived / elapsedSeconds2);
-        printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
-        printf("Total Bytes Received = %d\n",totalBytesReceived);
+        double uint8_tsPerSecond = ( (double)totalBytesReceived / elapsedSeconds2);
+        printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,uint8_tsPerSecond);
+        printf("Total uint8_ts Received = %i\n",totalBytesReceived);
 
         return;
 
@@ -116,7 +107,7 @@ int main(int argc, char** argv)
                 for(int bufpos = 0; bufpos < (tempSize-1); bufpos++) {
                         sendBuffer[bufpos] = (unsigned char) (65+((longCount+bufpos)%26));
                 }
-                printf("countdown=%d\n",longCount);
+                printf("countdown=%i\n",longCount);
 
                 clock_t cStart;
                 clock_t cEnd;
@@ -131,17 +122,17 @@ int main(int argc, char** argv)
 
                 double elapsedSeconds2 = ((double) cEnd - cStart) / 60.0F;
                 double elapsedSeconds = difftime(tEnd, tStart);
-                double bytesPerSecond = ( (double)tempSize / elapsedSeconds2);
-                printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,bytesPerSecond);
+                double uint8_tsPerSecond = ( (double)tempSize / elapsedSeconds2);
+                printf("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,uint8_tsPerSecond);
 
-                WORD receiveBytesAvailable = 0;
+                uint16_t receiveubytesAvailable = 0;
                 memset(receiveBuffer,0,tempSize);
 
-                socket->receive_available(socket,&receiveBytesAvailable);
+                socket->receive_available(socket,&receiveubytesAvailable);
 
-                printf("There are %d bytes available to read\n", receiveBytesAvailable);
-                if (receiveBytesAvailable>tempSize) receiveBytesAvailable = tempSize-1;
-                socket->receive(socket, receiveBuffer, receiveBytesAvailable);
+                printf("There are %i uint8_ts available to read\n", receiveubytesAvailable);
+                if (receiveubytesAvailable>tempSize) receiveubytesAvailable = tempSize-1;
+                socket->receive(socket, receiveBuffer, receiveubytesAvailable);
                 printf("Received Data : %s\n", receiveBuffer);
 
                 waitSeconds(3);

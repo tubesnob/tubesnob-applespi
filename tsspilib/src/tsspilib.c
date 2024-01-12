@@ -1,12 +1,5 @@
 #include "tsspilib.h"
 
-#include "../../orcadefaults.h"
-#pragma noroot
-
-#define WORD unsigned short 
-#define BYTE unsigned char 
-#define DWORD unsigned int
-
 #define A2_AN0_OFF  0xc058
 #define A2_AN0_ON   0xc059
 #define A2_AN1_OFF  0xc05a
@@ -24,18 +17,21 @@
 #define A2_PDL2X    0xc066
 #define A2_PDL2Y    0xc067
 
-#define SSEL_OFF (*((BYTE*)A2_AN0_OFF)  = (BYTE)0xA0)
-#define SSEL_ON  (*((BYTE*)A2_AN0_ON)   = (BYTE)0xA0)
-#define SCLK_OFF (*((BYTE*)A2_AN1_OFF)  = (BYTE)0xA0)
-#define SCLK_ON  (*((BYTE*)A2_AN1_ON)   = (BYTE)0xA0)
-#define MOSI_OFF (*((BYTE*)A2_AN3_OFF)  = (BYTE)0xA0)
-#define MOSI_ON  (*((BYTE*)A2_AN3_ON)   = (BYTE)0xA0)
-#define MISO_GET ((BYTE)(*((BYTE*)A2_PB0)))
+#define SSEL_OFF (*((uint8_t*)A2_AN0_OFF)  = (uint8_t)0xA0)
+#define SSEL_ON  (*((uint8_t*)A2_AN0_ON)   = (uint8_t)0xA0)
+#define SCLK_OFF (*((uint8_t*)A2_AN1_OFF)  = (uint8_t)0xA0)
+#define SCLK_ON  (*((uint8_t*)A2_AN1_ON)   = (uint8_t)0xA0)
+#define MOSI_OFF (*((uint8_t*)A2_AN3_OFF)  = (uint8_t)0xA0)
+#define MOSI_ON  (*((uint8_t*)A2_AN3_ON)   = (uint8_t)0xA0)
+#define MISO_GET ((uint8_t)(*((uint8_t*)A2_PB0)))
 
- unsigned short spisendb(BYTE *buffer, WORD numberOfBytes);
- unsigned short spireadb(BYTE *buffer, WORD numberOfBytes);
+ uint16_t spisendb(uint8_t *buffer, uint16_t numberOfuint8_ts);
+ uint16_t spireadb(uint8_t *buffer, uint16_t numberOfuint8_ts);
 
 void spi_init() {
+}
+
+void spi_shutdown() {
 }
 
 void spi_begin_trans() {
@@ -48,11 +44,11 @@ void spi_end_trans() {
     SCLK_OFF;
 }
 
-int spi_write(BYTE *txbuf, WORD txsize) {
+int spi_write(uint8_t *txbuf, uint16_t txsize) {
     return spisendb(txbuf, txsize);
 }
 
-int spi_read(BYTE* rxbuf, WORD rxsize) {
+int spi_read(uint8_t* rxbuf, uint16_t rxsize) {
     return spireadb(rxbuf, rxsize);
 }
 

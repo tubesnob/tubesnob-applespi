@@ -5,6 +5,8 @@
 #include <time.h>
 #include <memory.h>
 
+#include "../../orcadefaults.h"
+
 #ifndef __TSLIB_DOT_H__
 #define __TSLIB_DOT_H__
 
@@ -92,13 +94,13 @@ tsstring_vtbl_t*  tsstring_init();
 // UTILS
 //////////////////////////////////////
 
-void waitMilliseconds(int ms);
-void waitSeconds(int seconds);
+void waitMilliseconds(uint32_t ms);
+void waitSeconds(uint32_t seconds);
 
 //void DEBUG_LOG(const char *fmt, ...);
 
     
-unsigned short Nu_CalcCRC16(unsigned short seed, const unsigned char* ptr, int count);
+unsigned short Nu_CalcCRC16(uint16_t seed, const unsigned char* ptr, uint32_t count);
 
 char *strdup(const char *s);
 
@@ -220,13 +222,13 @@ int ini_parse_string(const char* string, ini_handler handler, void* user);
 #endif
 
 /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
-   fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
+   fixed-size buffer of INI_MAX_LINE uint8_ts. Only applies if INI_USE_STACK is
    zero. */
 #ifndef INI_ALLOW_REALLOC
 #define INI_ALLOW_REALLOC 0
 #endif
 
-/* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
+/* Initial size in uint8_ts for heap line buffer. Only applies if INI_USE_STACK
    is zero. */
 #ifndef INI_INITIAL_ALLOC
 #define INI_INITIAL_ALLOC 200

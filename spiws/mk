@@ -20,6 +20,11 @@ $runiix  compile $buildopts \
 	spiws_config.c \
 	spiws_init_w5500.c
 
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 mk_movebin $srcdir $bindir
 
@@ -33,6 +38,12 @@ $runiix  link $linkopts \
 	../../tssocketlib/lib/tssocketlib \
 	../../tsspilib/lib/tsspilib \
 	keep=spiws
+
+if [[ "$?" != "0" ]] 
+then
+echo "exiting"
+	exit 1
+fi
 
 cd $rootdir
 

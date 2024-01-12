@@ -1,6 +1,5 @@
 #include "tslib.h"
 #include "../../orcadefaults.h"
-#pragma noroot
 
 static void  tsarray_resize(tsarray_t* self, tslib_size_t newSize);
 static void  tsarray_set(tsarray_t* self, tslib_size_t index, void* item);

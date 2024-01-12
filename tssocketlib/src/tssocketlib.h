@@ -1,3 +1,5 @@
+#include "../../orcadefaults.h"
+
 #ifndef __TSSOCKETLIB_DOT_H__
 #define __TSSOCKETLIB_DOT_H__
 
@@ -21,43 +23,42 @@
 #define MAX_SOCKETS 0x08
 
 typedef struct {
-   unsigned char a0;
-   unsigned char a1;
-   unsigned char a2;
-   unsigned char a3;
-   unsigned char a4;
-   unsigned char a5;
+   uint8_t a0;
+   uint8_t a1;
+   uint8_t a2;
+   uint8_t a3;
+   uint8_t a4;
+   uint8_t a5;
 } address_t;
 
 
 typedef struct socket_t {
-   unsigned char  number;
-   unsigned char  protocol;
-   unsigned short id;
-   address_t      dest_ip;
-   unsigned short source_port;
-   unsigned short dest_port;
-   unsigned char  status;
-   unsigned short rx_bytes_available;
+   uint8_t      number;
+   uint8_t      protocol;
+   uint16_t     id;
+   address_t    dest_ip;
+   uint16_t     source_port;
+   uint16_t     dest_port;
+   uint8_t      status;
+   uint16_t     rx_bytes_available;
    int (*close)(struct socket_t *);
    int (*connect)(struct socket_t *);
    int (*disconnect)(struct socket_t *);
    int (*listen)(struct socket_t *);
-   int (*send)(struct socket_t *, unsigned char *, unsigned short);
-   int (*receive_available)(struct socket_t *, unsigned short *);
-   int (*receive)(struct socket_t *, unsigned char *, unsigned short);
+   int (*send)(struct socket_t *, uint8_t* , uint16_t);
+   int (*receive_available)(struct socket_t *, uint16_t*);
+   int (*receive)(struct socket_t *, uint8_t* , uint16_t);
    int (*refresh)(struct socket_t *);
 } socket_t;
 
 void socket_init();
 
-int socket_create(unsigned char protocol, unsigned short source_port, socket_t** socket);
+socket_t* socket_create(uint8_t protocol, uint16_t source_port);
 char* iptostr(address_t ip, char* buf);
 int strtoip(const char *str, address_t* ip);
 char* mactostr(address_t mac, char *buf);
 int strtomac(const char *str, address_t* mac);
 address_t* addrcpy(address_t* dest, const address_t* source);
-
 void dump_socketStatus(socket_t* socket);
 
 #endif

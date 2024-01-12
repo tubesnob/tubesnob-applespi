@@ -7,6 +7,7 @@
 	"settings": {
 		"workbench.sideBar.location": "right",
 		"workbench.editor.enablePreview": false,
-		"workbench.list.openMode": "doubleClick"
+		"workbench.list.openMode": "doubleClick",
+		"terminal.integrated.tabStopWidth": 4
 	}
 }
