@@ -19,6 +19,8 @@ $runiix compile \
 	tsarray.c \
 	tslist.c \
 	tsstring.c \
+    getopt.c \
+    tslog.c \
 	tsmem.c \
 	nucrc16.c
 
@@ -37,6 +39,8 @@ $runiix makelib \
 	+tsarray.a \
 	+tslist.a \
 	+ini.a \
+    +getopt.a \
+    +tslog.a \
 	+utils.a \
 	+tsstring.a \
 	+tsmem.a \

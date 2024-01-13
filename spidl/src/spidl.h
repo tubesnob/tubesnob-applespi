@@ -1,14 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <time.h>
-
 #include "../../orcadefaults.h"
-
-#include "../../tslib/lib/tslib.h"
-#include "../../tssocketlib/lib/tssocketlib_w5500.h"
-#include "../../tssocketlib/lib/tssocketlib.h"
 
 #ifndef __SPIDL_DOT_H__
 #define __SPIDL_DOT_H__
@@ -32,6 +22,7 @@ typedef struct
         char *file_name;
         char *save_file_name;
         uint16_t packet_size;
+        uint8_t outputFileToSTDOUT;
 } config_t;
 
 

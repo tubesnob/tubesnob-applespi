@@ -1,7 +1,7 @@
 #include "tssocketlib_w5500.h"
 #include "tssocketlib_w5500_defs.h"
-#include "../../tslib/lib/tslib.h"
-#include "../../tsspilib/lib/tsspilib.h"
+#include "../../tslib/src/tslib.h"
+#include "../../tsspilib/src/tsspilib.h"
 
 #include "../../orcadefaults.h"
 #pragma noroot
@@ -194,89 +194,89 @@ int w5500_dump_state() {
 
         unsigned char* rbuf = (unsigned char*) malloc(32);
 
-        printf("###### W5500 STATUS DUMP ######\n");
+        _tslog->info("###### W5500 STATUS DUMP ######\n");
         
         w5500_get_VERSIONR(rbuf);
-        printf("W5500 Version = %d\n", rbuf[0]);
+        _tslog->info("W5500 Version = %d\n", rbuf[0]);
 
         w5500_get_SRCMAC(rbuf);
-        printf("MAC Address = %x:%x:%x:%x:%x:%x\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3], rbuf[4], rbuf[5]);
+        _tslog->info("MAC Address = %x:%x:%x:%x:%x:%x\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3], rbuf[4], rbuf[5]);
 
         w5500_get_SRCIP(rbuf);
-        printf("IP Address = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("IP Address = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_get_SUBMASK(rbuf);
-        printf("Subnet Mask = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("Subnet Mask = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_get_GWADDR(rbuf);
-        printf("Gateway = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("Gateway = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_phycfg_t phyConfig;
         w5500_get_PHYCFG(&phyConfig);
 
-        printf("Duplex Status = ");
+        _tslog->info("Duplex Status = ");
         switch(phyConfig.duplex_status)
         {
-                case W5500_PHYCFG_DUPLEX_HALF: printf("HALF\n"); break;
-                case W5500_PHYCFG_DUPLEX_FULL: printf("FULL\n"); break;
-                default : printf("UNKNOWN\n"); break;
+                case W5500_PHYCFG_DUPLEX_HALF: _tslog->info("HALF\n"); break;
+                case W5500_PHYCFG_DUPLEX_FULL: _tslog->info("FULL\n"); break;
+                default : _tslog->info("UNKNOWN\n"); break;
         }
 
-        printf("Link Status = ");
+        _tslog->info("Link Status = ");
         switch(phyConfig.link_status)
         {
-                case W5500_PHYCFG_LINKSTATUS_DOWN: printf("DOWN\n"); break;
-                case W5500_PHYCFG_LINKSTATUS_UP: printf("UP\n"); break;
-                default : printf("UNKNOWN\n"); break;
+                case W5500_PHYCFG_LINKSTATUS_DOWN: _tslog->info("DOWN\n"); break;
+                case W5500_PHYCFG_LINKSTATUS_UP: _tslog->info("UP\n"); break;
+                default : _tslog->info("UNKNOWN\n"); break;
         }
 
-        printf("Speed = ");
+        _tslog->info("Speed = ");
         switch(phyConfig.speed_status)
         {
-                case W5500_PHYCFG_SPEED_10MBPS: printf("10Mbps\n"); break;
-                case W5500_PHYCFG_SPEED_100MBPS: printf("100Mbps\n"); break;
-                default : printf("UNKNOWN\n"); break;
+                case W5500_PHYCFG_SPEED_10MBPS: _tslog->info("10Mbps\n"); break;
+                case W5500_PHYCFG_SPEED_100MBPS: _tslog->info("100Mbps\n"); break;
+                default : _tslog->info("UNKNOWN\n"); break;
         }
 
-        printf("OpMode = ");
+        _tslog->info("OpMode = ");
         switch(phyConfig.opmode)
         {
-                case W5500_PHYCFG_OPMODE_10BT_HALF_NOAUTO : printf("10BT HALF NOAUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_10BT_FULL_NOAUTO  : printf("10BT FULL NOAUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_100BT_HALF_NOAUTO  : printf("100BT HALF NOAUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_100BT_FULL_NOAUTO  : printf("100BT FULL NOAUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_100BT_HALF_AUTO  : printf("100BT HALF AUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_NOTUSED  : printf("10BT HALF NOAUTO\n"); break;
-                case W5500_PHYCFG_OPMODE_POWERDOWN   : printf("POWERDOWN\n"); break;
-                case W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO  : printf("ALL CAPABLE\n"); break;
-                default : printf("UNKNOWN\n"); break;
+                case W5500_PHYCFG_OPMODE_10BT_HALF_NOAUTO : _tslog->info("10BT HALF NOAUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_10BT_FULL_NOAUTO  : _tslog->info("10BT FULL NOAUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_100BT_HALF_NOAUTO  : _tslog->info("100BT HALF NOAUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_100BT_FULL_NOAUTO  : _tslog->info("100BT FULL NOAUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_100BT_HALF_AUTO  : _tslog->info("100BT HALF AUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_NOTUSED  : _tslog->info("10BT HALF NOAUTO\n"); break;
+                case W5500_PHYCFG_OPMODE_POWERDOWN   : _tslog->info("POWERDOWN\n"); break;
+                case W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO  : _tslog->info("ALL CAPABLE\n"); break;
+                default : _tslog->info("UNKNOWN\n"); break;
         }
 
 
         for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
-                printf("[S%d]: ", socketNumber);
+                _tslog->info("[S%d]: ", socketNumber);
                 w5500_get_socket_STATUS(socketNumber, rbuf);
                 switch(rbuf[0]) {
-                        case W5500_SOCKET_STATUS_CLOSED: printf("W5500_SOCKET_STATUS_CLOSED\n"); break;
-                        case W5500_SOCKET_STATUS_INIT: printf("W5500_SOCKET_STATUS_INIT\n"); break;
-                        case W5500_SOCKET_STATUS_LISTEN: printf("W5500_SOCKET_STATUS_LISTEN\n"); break;
-                        case W5500_SOCKET_STATUS_SYNSENT: printf("W5500_SOCKET_STATUS_SYNSENT\n"); break;
-                        case W5500_SOCKET_STATUS_SYNRECV: printf("W5500_SOCKET_STATUS_SYNRECV\n"); break;
-                        case W5500_SOCKET_STATUS_ESTABLISHED: printf("W5500_SOCKET_STATUS_ESTABLISHED\n"); break;
-                        case W5500_SOCKET_STATUS_FIN_WAIT: printf("W5500_SOCKET_STATUS_FIN_WAIT\n"); break;
-                        case W5500_SOCKET_STATUS_CLOSING: printf("W5500_SOCKET_STATUS_CLOSING\n"); break;
-                        case W5500_SOCKET_STATUS_TIME_WAIT: printf("W5500_SOCKET_STATUS_TIME_WAIT\n"); break;
-                        case W5500_SOCKET_STATUS_CLOSE_WAIT: printf("W5500_SOCKET_STATUS_CLOSE_WAIT\n"); break;
-                        case W5500_SOCKET_STATUS_LAST_ACK: printf("W5500_SOCKET_STATUS_LAST_ACK\n"); break;
-                        case W5500_SOCKET_STATUS_UDP: printf("W5500_SOCKET_STATUS_UDP\n"); break;
-                        case W5500_SOCKET_STATUS_IPRAW: printf("W5500_SOCKET_STATUS_IPRAW\n"); break;
-                        case W5500_SOCKET_STATUS_MACRAW: printf("W5500_SOCKET_STATUS_MACRAW\n"); break;
-                        case W5500_SOCKET_STATUS_PPPOE: printf("W5500_SOCKET_STATUS_PPPOE\n"); break;
+                        case W5500_SOCKET_STATUS_CLOSED: _tslog->info("W5500_SOCKET_STATUS_CLOSED\n"); break;
+                        case W5500_SOCKET_STATUS_INIT: _tslog->info("W5500_SOCKET_STATUS_INIT\n"); break;
+                        case W5500_SOCKET_STATUS_LISTEN: _tslog->info("W5500_SOCKET_STATUS_LISTEN\n"); break;
+                        case W5500_SOCKET_STATUS_SYNSENT: _tslog->info("W5500_SOCKET_STATUS_SYNSENT\n"); break;
+                        case W5500_SOCKET_STATUS_SYNRECV: _tslog->info("W5500_SOCKET_STATUS_SYNRECV\n"); break;
+                        case W5500_SOCKET_STATUS_ESTABLISHED: _tslog->info("W5500_SOCKET_STATUS_ESTABLISHED\n"); break;
+                        case W5500_SOCKET_STATUS_FIN_WAIT: _tslog->info("W5500_SOCKET_STATUS_FIN_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_CLOSING: _tslog->info("W5500_SOCKET_STATUS_CLOSING\n"); break;
+                        case W5500_SOCKET_STATUS_TIME_WAIT: _tslog->info("W5500_SOCKET_STATUS_TIME_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_CLOSE_WAIT: _tslog->info("W5500_SOCKET_STATUS_CLOSE_WAIT\n"); break;
+                        case W5500_SOCKET_STATUS_LAST_ACK: _tslog->info("W5500_SOCKET_STATUS_LAST_ACK\n"); break;
+                        case W5500_SOCKET_STATUS_UDP: _tslog->info("W5500_SOCKET_STATUS_UDP\n"); break;
+                        case W5500_SOCKET_STATUS_IPRAW: _tslog->info("W5500_SOCKET_STATUS_IPRAW\n"); break;
+                        case W5500_SOCKET_STATUS_MACRAW: _tslog->info("W5500_SOCKET_STATUS_MACRAW\n"); break;
+                        case W5500_SOCKET_STATUS_PPPOE: _tslog->info("W5500_SOCKET_STATUS_PPPOE\n"); break;
                 }
         }
 
         free(rbuf);
 
-        printf("###########################\n");
+        _tslog->info("###########################\n");
         
 }

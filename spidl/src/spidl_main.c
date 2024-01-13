@@ -1,215 +1,254 @@
 #include "spidl.h"
+#include "../../tslib/src/tslib.h"
+#include "../../tslib/src/getopt.h"
+#include "../../tssocketlib/src/tssocketlib_w5500.h"
+#include "../../tssocketlib/src/tssocketlib.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <time.h>
 
 #define BUFFER_SIZE 0x1000
 
 static int config_handler(void* user, const char* section, const char* name, const char* value);
-static tsstring_vtbl_t* _strings;
-
 config_t* config_cleanup(config_t* config);
 
 int main(int argc, char** argv)
 {
-        
-        _strings = tsstring_init();
+    tslib_init();
 
-        config_t *config = (config_t*) malloc(sizeof(config_t));
-        int __rv;
+    int __rv;
+    _tslog->logMask = TSLOG_LEVEL_INFO | TSLOG_LEVEL_ERROR;
 
-        if (ini_parse("spidl.cfg", config_handler, config) < 0) {
-                printf("Couldn't find spidl.cfg. Exiting\n");
-                __rv = 1;
-                goto exit;
-        }
+    char* configFileToLoad = NULL;
+    config_t *config = (config_t*) malloc(sizeof(config_t));
+    config->outputFileToSTDOUT = 0;
 
-        if (argc<2) {
-                printf("No parameters specified");
-                __rv = 1;
-                goto exit;
-        }
-
-        config->file_name = strdup(argv[1]);
-        if (argc==3) {
-                config->save_file_name = strdup(argv[2]);
-        }
-        else
+    int c = 0;
+    while (1)
+    {
+        int this_option_optind = optind ? optind : 1;
+        c = getopt (argc, argv, "dc:b:vi:o:s");
+        if (c == EOF)
+            break;
+        switch (c)
         {
-            // use the file name requested as the output file path
-            tsstring_t* fileNameString = _strings->create_c(config->file_name);
-            tslist_t* fileNameParts = fileNameString->f->split(fileNameString, "/");
-            tsstring_t* lastItemInSplitString = (tsstring_t*) fileNameParts->get(fileNameParts, fileNameParts->count-1);
-            config->save_file_name = strdup(lastItemInSplitString->data);
-            fileNameParts->clear(fileNameParts);
-            fileNameString->f->clear(fileNameString);
-            lastItemInSplitString->f->clear(lastItemInSplitString);
+            case 'd':
+                // output file to stdout
+                config->outputFileToSTDOUT = 1;
+                break;
+            case 'c':
+                // config file
+                configFileToLoad = strdup(optarg);
+                break;
+            case 'b':
+                // block size
+                config->packet_size = atoi(optarg);
+                break;
+            case 'v':
+                // verbose
+                _tslog->logMask |= TSLOG_LEVEL_VERBOSE;
+                break;
+            case 'i':
+                // file name to read
+                config->file_name = strdup(optarg);
+                break;
+            case 'o':
+                // file name to save
+                config->save_file_name = strdup(optarg);
+                break;
+            case 's':
+                // silent mode
+                _tslog->logMask = TSLOG_LEVEL_NONE;
+                break;
         }
+    }
 
-        printf("Source\n   IP : %s\n   MAC : %s\n   Mask : %s\n   GW : %s\n",config->source_ipaddr,config->source_macaddr,config->source_mask,config->source_gwaddr);
-        printf("Destination\n   IP : %s\n   Port : %i\n",config->dest_ip, config->dest_port);
-        printf("Transfer\n   File Name : %s\n   Save File Name : %s\n   Packet Size : %i\n",config->file_name, config->save_file_name, config->packet_size);
+    if (!configFileToLoad)
+        configFileToLoad = strdup("spidl.cfg");
 
-        printf("Initializing SPI ... ");
-        spi_init();
-        printf("OK\n");
+    if (ini_parse(configFileToLoad, config_handler, config) < 0) {
+            _tslog->error("Couldn't find configuration file @ [%s]. Exiting\n",configFileToLoad);
+            __rv = 1;
+            goto exit;
+    }
 
-        printf("Initializing SOCKETS ... ");
-        socket_init();
-        printf("OK\n");
+    if (!config->file_name) {
+            _tslog->error("No download file name specified\n");
+            __rv = 1;
+            goto exit;
+    }
 
-        printf("Initializing W5500 ... ");
-        w5500_init();
-        printf("OK\n");
+    // if the command didn't specify a file name to save, then find the file name in the input file path and use it.
+    if (!config->save_file_name) {
+        // use the file name requested as the output file path
+        tsstring_t* fileNameString = _tsstring->new_c(config->file_name);
+        tslist_t* fileNameParts = _tsstring->split(fileNameString, "/");
+        tsstring_t* lastItemInSplitString = (tsstring_t*) _tslist->get(fileNameParts, fileNameParts->count-1);
+        config->save_file_name = strdup(lastItemInSplitString->data);
+        _tslist->clear(fileNameParts);
+        _tsstring->clear(fileNameString);
+        _tsstring->clear(lastItemInSplitString);
+    }
 
-        printf("Resetting W5500 ... ");
-        w5500_reset();
-        printf("OK\n");
+    _tslog->verbose("Source\n   IP : %s\n   MAC : %s\n   Mask : %s\n   GW : %s\n",config->source_ipaddr,config->source_macaddr,config->source_mask,config->source_gwaddr);
+    _tslog->verbose("Destination\n   IP : %s\n   Port : %i\n",config->dest_ip, config->dest_port);
+    _tslog->verbose("Transfer\n   File Name : %s\n   Save File Name : %s\n   Packet Size : %i\n",config->file_name, config->save_file_name, config->packet_size);
 
-        printf("Setting W5500 LAN Properties ... ");
-        address_t* source_hwaddr = (address_t*) malloc(sizeof(address_t));
-        strtomac(config->source_macaddr, source_hwaddr);
-        w5500_set_SRCMAC((unsigned char*) source_hwaddr);
-        
-        address_t* source_ipaddr = (address_t*) malloc(sizeof(address_t));
-        strtoip(config->source_ipaddr, source_ipaddr);
-        w5500_set_SRCIP((unsigned char*) source_ipaddr);
+    _tslog->verbose("Initializing SPI ... ");
+    spi_init();
+    _tslog->verbose("OK\n");
 
-        address_t* source_mask = (address_t*) malloc(sizeof(address_t));
-        strtoip(config->source_mask, source_mask);
-        w5500_set_SUBMASK((unsigned char*) source_mask);
-        
-        address_t* source_gwaddr = (address_t*) malloc(sizeof(address_t));
-        strtoip(config->source_gwaddr, source_gwaddr);
-        w5500_set_GWADDR((unsigned char*) source_gwaddr);
-        printf("OK\n");
+    _tslog->verbose("Initializing SOCKETS ... ");
+    socket_init();
+    _tslog->verbose("OK\n");
 
-        printf("Creating Socket ... ");
-        socket_t* socket = socket_create(SOCKET_PROTOCOL_TCP, config->source_port);
-        printf("[%i]\n",socket->number);
+    _tslog->verbose("Initializing W5500 ... ");
+    w5500_init();
+    _tslog->verbose("OK\n");
 
-        printf("socket is at address 0x%08X\n", (unsigned int)socket);
-
-        strtoip(config->dest_ip, &socket->dest_ip);
-        socket->dest_port = config->dest_port;
-
-        printf("Connecting ...");
-        socket->connect(socket);
-
-        // wait until we are connected...
-        while (socket->status != SOCKET_STATUS_ESTABLISHED)
-        {
-                printf(".");
-                waitMilliseconds(100);
-                socket->refresh(socket);
-        }
-        printf(" Connected\n");
-
-        // small buffer for our send commands
-        char *sendCommand = (char*) malloc(400);
-
-        // send the command to the destination
-        sprintf(sendCommand,"SENDFILE\n%s\n%i\n\0",config->file_name,config->packet_size);
-        socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
-
-        // set up a buffer to receive data...
-        unsigned char* receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
-
-        uint16_t packetHeaderSize = sizeof(data_packet_t);
-        uint16_t fixedReceiveBlockSize = packetHeaderSize + config->packet_size;
-
-        // receive a block of data...
-        socket->receive(socket, receiveBuffer, fixedReceiveBlockSize);
-        uint16_t* headeruint8_ts = (uint16_t*) receiveBuffer;
-        
-        data_packet_t* packet = (data_packet_t*) receiveBuffer;
-        unsigned char* packetData = &receiveBuffer[packetHeaderSize];
-
-        if (packet->packetNumber !=0) {
-                printf("Invalid packet header\nExiting\n");
-                return;
-        }
-
-        unsigned long totalFileSize = packet->packetDataLength;
-        unsigned int totalFileSizeKB = totalFileSize / 1024;
-
-        printf("Total File Size = %i KB\n",totalFileSizeKB);
-
-        FILE* outfile = stdout;
-        if (config->save_file_name != NULL) {
-            outfile = fopen(config->save_file_name,"w");
-        }
-
-        if (!outfile) {
-                printf("Could not open file [%s] for writing\nExiting\n", config->save_file_name);
-                return 1;
-        }
-
-        clock_t xfer_start = clock();
-        uint16_t workPacketNumber = 1;
-        while(workPacketNumber <= packet->totalNumberOfPackets) {
-
-                sprintf(sendCommand,"sendpacket\n%i\n\0",workPacketNumber);
-
-                printf("[%i/%i] : S", workPacketNumber, (unsigned int) packet->totalNumberOfPackets);
-                socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
-
-                printf("R");
-                socket->receive(socket,receiveBuffer,fixedReceiveBlockSize);
-
-                printf("C");
-                uint16_t ourCRC16 = Nu_CalcCRC16((unsigned short) workPacketNumber, packetData, packet->packetDataLength);
-                if (packet->packetCRC16 != ourCRC16) {
-                        workPacketNumber--;
-                        printf("X");
-                }
-                else 
-                {
-
-                        printf("W");
-                        fwrite(packetData, 1, packet->packetDataLength, outfile);
-                        printf("*");
-
-                }
-                printf("\n");
-                workPacketNumber++;
-        }
-
-        printf("\nTransfer Completed. Flushing Data.\n");
-        fflush(outfile);
-        fclose(outfile);
-        printf("File Saved\n");
-
-        printf("\nTelling the host we are going away.\n");
-        sprintf(sendCommand,"quit\n\0");
-        socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
-
-        printf("Closing Connection\n");
-        socket->close(socket);
-
-        
-        printf(" Done\n");
-        printf("\nWaiting....\n");
-        waitSeconds(1);
+    _tslog->verbose("Resetting W5500 ... ");
+    w5500_reset();
+    _tslog->verbose("OK\n");
 
 
-        clock_t xfer_end = clock();
-        uint16_t ticks = xfer_end - xfer_start;
-        double totalMilliseconds = 16.6666f * ticks;
-        double totalSeconds = totalMilliseconds / 1000;
-        double bytesPerSecond = totalFileSize / totalSeconds;
-        printf("Total Elapsed Time = %fms\n",totalMilliseconds);
-        printf("Bytes Per Second = %f\n",bytesPerSecond);
+    _tslog->info("Initializing Network Adapter ... ");
+    address_t* source_hwaddr = (address_t*) malloc(sizeof(address_t));
+    strtomac(config->source_macaddr, source_hwaddr);
+    w5500_set_SRCMAC((unsigned char*) source_hwaddr);
+    
+    address_t* source_ipaddr = (address_t*) malloc(sizeof(address_t));
+    strtoip(config->source_ipaddr, source_ipaddr);
+    w5500_set_SRCIP((unsigned char*) source_ipaddr);
 
-        exit:
+    address_t* source_mask = (address_t*) malloc(sizeof(address_t));
+    strtoip(config->source_mask, source_mask);
+    w5500_set_SUBMASK((unsigned char*) source_mask);
+    
+    address_t* source_gwaddr = (address_t*) malloc(sizeof(address_t));
+    strtoip(config->source_gwaddr, source_gwaddr);
+    w5500_set_GWADDR((unsigned char*) source_gwaddr);
+    _tslog->info("OK\n");
 
-        printf("Cleaning Up ... ");
-        config = config_cleanup(config);
-        freeandnull(receiveBuffer);
-        freeandnull(sendCommand);
-        printf("Done!\n");
+    socket_t* socket = socket_create(SOCKET_PROTOCOL_TCP, config->source_port);
+    strtoip(config->dest_ip, &socket->dest_ip);
+    socket->dest_port = config->dest_port;
 
-        return __rv;
+    _tslog->info("Connecting to host @ %s:%i ...",config->dest_ip, config->dest_port);
+    socket->connect(socket);
+    while (socket->status != SOCKET_STATUS_ESTABLISHED)
+    {
+            _tslog->info(".");
+            waitMilliseconds(100);
+            socket->refresh(socket);
+    }
+    _tslog->info(" Connected!\n");
+
+    // small buffer for our send commands and receive buffer
+    char *sendCommand = (char*) malloc(400);
+    unsigned char* receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
+
+    // send the command to the destination
+    _tslog->info("Requesting file [%s]\n", config->file_name);
+    sprintf(sendCommand,"SENDFILE\n%s\n%i\n\0",config->file_name,config->packet_size);
+    socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
+
+    uint16_t packetHeaderSize = sizeof(data_packet_t);
+    uint16_t fixedReceiveBlockSize = packetHeaderSize + config->packet_size;
+
+    // receive a block of data...
+    _tslog->info("Waiting for header packet\n");
+    socket->receive(socket, receiveBuffer, fixedReceiveBlockSize);
+    uint16_t* headeruint8_ts = (uint16_t*) receiveBuffer;
+    data_packet_t* packet = (data_packet_t*) receiveBuffer;
+    unsigned char* packetData = &receiveBuffer[packetHeaderSize];
+
+    if (packet->packetNumber !=0) {
+            _tslog->error("Invalid packet header\nExiting\n");
+            return;
+    }
+
+    unsigned long totalFileSize = packet->packetDataLength;
+    unsigned int totalFileSizeKB = totalFileSize / 1024;
+    _tslog->info("Total File Size = %i KB\n",totalFileSizeKB);
+
+    FILE* outfile = stdout;
+    if (config->save_file_name != NULL && !config->outputFileToSTDOUT) {
+        outfile = fopen(config->save_file_name,"w");
+    }
+
+    if (!outfile) {
+            _tslog->error("Could not open file [%s] for writing\nExiting\n", config->save_file_name);
+            return 1;
+    }
+
+    _tslog->info("Starting data transfer\n");
+    clock_t xfer_start = clock();
+    uint16_t workPacketNumber = 1;
+    while(workPacketNumber <= packet->totalNumberOfPackets) {
+
+            sprintf(sendCommand,"sendpacket\n%i\n\0",workPacketNumber);
+
+            _tslog->info("[%i/%i] : S", workPacketNumber, (unsigned int) packet->totalNumberOfPackets);
+            socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
+
+            _tslog->info("R");
+            socket->receive(socket,receiveBuffer,fixedReceiveBlockSize);
+
+            _tslog->info("C");
+            uint16_t ourCRC16 = Nu_CalcCRC16((unsigned short) workPacketNumber, packetData, packet->packetDataLength);
+            if (packet->packetCRC16 != ourCRC16) {
+                    workPacketNumber--;
+                    _tslog->info("X");
+            }
+            else 
+            {
+
+                    _tslog->info("W");
+                    fwrite(packetData, 1, packet->packetDataLength, outfile);
+                    _tslog->info("*");
+
+            }
+            _tslog->info("\n");
+            workPacketNumber++;
+    }
+
+    _tslog->info("Data Transfer Completed. Flushing Data And Closing file.\n");
+    fflush(outfile);
+    fclose(outfile);
+    _tslog->info("File Saved\n");
+
+    _tslog->info("Ending Session w/ Host\n");
+    sprintf(sendCommand,"quit\n\0");
+    socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
+
+    _tslog->info("Closing Connection\n");
+    socket->close(socket);
+
+    clock_t xfer_end = clock();
+    uint16_t ticks = xfer_end - xfer_start;
+    double totalMilliseconds = 16.6666f * ticks;
+    double totalSeconds = totalMilliseconds / 1000;
+    double bytesPerSecond = totalFileSize / totalSeconds;
+    _tslog->info("Total Elapsed Time = %fms\n",totalMilliseconds);
+    _tslog->info("Bytes Per Second = %f\n",bytesPerSecond);
+
+    exit:
+
+    _tslog->info("Cleaning Up ... ");
+
+    config = config_cleanup(config);
+    freeandnull(receiveBuffer);
+    freeandnull(sendCommand);
+    _tslog->info("Done!\n");
+
+    tslib_shutdown();
+
+    return __rv;
 
 }
-
 
 config_t* config_cleanup(config_t* config) 
 {

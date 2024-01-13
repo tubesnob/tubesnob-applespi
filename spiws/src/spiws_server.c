@@ -42,7 +42,7 @@ int spiws_server_run(config_t* config) {
                 if (socket->listen(socket)) {
 
                         iptostr(socket->dest_ip, (char*)__tempBuffer);
-                        printf("Connected to %s:%u\n", __tempBuffer,socket->dest_port);
+                        _tslog->info("Connected to %s:%u\n", __tempBuffer,socket->dest_port);
                 }
 
                 spiws_server_handle(config, socket);
@@ -63,7 +63,7 @@ int spiws_server_run(config_t* config) {
 
 void spiws_server_handle(config_t* config, socket_t* socket) {
 
-        printf("Handling socket %i[%i]\n",socket->id,socket->number);
+        _tslog->info("Handling socket %i[%i]\n",socket->id,socket->number);
         
         int lineCount=0;
 
@@ -72,13 +72,13 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                 socket->refresh(socket);
 
                 if (socket->status != SOCKET_STATUS_ESTABLISHED) {
-                        printf("Socket is no longer connected.\n");
+                        _tslog->info("Socket is no longer connected.\n");
                         break;
                 }
 
                 int lineLength = spiws_server_streamreader(socket, __lineBuffer, LINE_BUFFER_SIZE);
                 if (lineLength) {
-                        //printf("[%u:%u:%u] : %s",lineCount++,lineLength,__lineBuffer[0],__lineBuffer);
+                        //_tslog->info("[%u:%u:%u] : %s",lineCount++,lineLength,__lineBuffer[0],__lineBuffer);
                 }
 
                 if (lineLength==1) {
@@ -99,9 +99,9 @@ void spiws_server_handle(config_t* config, socket_t* socket) {
                                 fseek(fp, 0, SEEK_SET); // seek back to beginning of file         
                         }
                         else
-                                printf("No file\n");
+                                _tslog->info("No file\n");
                         
-                        sprintf((char*) __responseBuffer,"Content-Length: %u\n",fileSize);
+                        _tslog->info((char*) __responseBuffer,"Content-Length: %u\n",fileSize);
                         spiws_server_streamwriter(socket,__responseBuffer, (int) strlen((char*)__responseBuffer));
 
                         strcpy((char*)__responseBuffer,"Connection: closed\n");
@@ -138,10 +138,10 @@ int spiws_server_streamreader(socket_t* socket, uint8_t *linebuffer, int size) {
         uint8_t* end = &__requestBuffer[REQUEST_BUFFER_SIZE];
 
         if (socket->rx_bytes_available) {
-                //printf("reading %u bytes\n",socket->rx_bytes_available);
+                //_tslog->info("reading %u bytes\n",socket->rx_bytes_available);
                 if (__requestBufferPos + socket->rx_bytes_available > end) return 0;
                 uint16_t bytesRead = socket->receive(socket, __requestBufferPos, socket->rx_bytes_available);
-                //printf("read %u bytes\n",bytesRead);
+                //_tslog->info("read %u bytes\n",bytesRead);
                 __requestBufferPos += bytesRead;
         }
 
@@ -149,11 +149,11 @@ int spiws_server_streamreader(socket_t* socket, uint8_t *linebuffer, int size) {
         uint8_t* xxx = __streamReaderPos;
         uint8_t counter = 0;
         while(xxx < __requestBufferPos && counter < 10) {
-                printf("[%u]",*xxx);
+                _tslog->info("[%u]",*xxx);
                 xxx++;
                 counter++;
         }
-        printf("\n***************\n");
+        _tslog->info("\n***************\n");
         */
 
         // do we have any data to process?
@@ -188,7 +188,7 @@ int spiws_server_streamreader(socket_t* socket, uint8_t *linebuffer, int size) {
 
 
 int  spiws_server_streamwriter(socket_t* socket, uint8_t* buffer, int size) {
-        //printf("[SEND] %s\n",buffer);
+        //_tslog->info("[SEND] %s\n",buffer);
         socket->send(socket,buffer,size);
 }
 

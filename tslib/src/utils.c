@@ -1,6 +1,5 @@
 #include "tslib.h"
 #include "../../orcadefaults.h"
-#pragma noroot
 
 #define __debug_log_buffer_size 0x100
 static time_t __debug_log_time_val;
@@ -8,6 +7,22 @@ static clock_t __debug_log_clock_val;
 static struct tm*  __debug_log_local_time;
 static char *__debug_log_asctime;
 static char __debug_buffer[__debug_log_buffer_size];
+
+void tslib_init() {
+    tslog_init();
+    tsarray_init();
+    tsmem_init();
+    tsstring_init();
+    tslist_init();
+}
+
+void tslib_shutdown() {
+    tslog_shutdown();
+    tsarray_shutdown();
+    tsstring_shutdown();
+    tslist_shutdown();
+    tsmem_shutdown();
+}
 
 void waitMilliseconds(uint32_t ms)
 {

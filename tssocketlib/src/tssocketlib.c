@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../tslib/src/tslib.h"
 #include "tssocketlib.h"
 #include "tssocketlib_w5500.h"
 
@@ -34,9 +35,9 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
 
    // find a socket that is closed ....
    for(sn=0; sn < W5500_MAX_SOCKETS; sn++) {
-      printf("Getting status of socket %i : ",sn);
+      _tslog->info("Getting status of socket %i : ",sn);
       w5500_get_socket_STATUS(sn, &status);
-      printf("%X\n",status);
+      _tslog->info("%X\n",status);
       if (status==W5500_SOCKET_STATUS_CLOSED) 
          break;
    };
@@ -44,12 +45,12 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
    // if we went past our maximum number of sockets, none are available
    // clean up any sockets eligible for closure
    if (sn >= W5500_MAX_SOCKETS) {
-         printf("No sockets available. Trying to close one.\n");
+         _tslog->info("No sockets available. Trying to close one.\n");
          unsigned char found = 0;
          unsigned char status;
          for(sn=0; sn < W5500_MAX_SOCKETS && !found; sn++) {
 
-            printf("Checking closed status of socket %i : ");
+            _tslog->info("Checking closed status of socket %i : ");
 
             w5500_get_socket_STATUS(sn, &status);
             switch(status) {
@@ -57,22 +58,22 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
                   case W5500_SOCKET_STATUS_TIME_WAIT:
                   case W5500_SOCKET_STATUS_FIN_WAIT:
                   case W5500_SOCKET_STATUS_CLOSING:
-                        printf("CAN BE CLOSED! CLOSING! ... ");
+                        _tslog->info("CAN BE CLOSED! CLOSING! ... ");
                         w5500_set_socket_COMMAND(sn, W5500_SOCKET_CMD_CLOSE);
                         found = 1;
-                        printf("CLOSED");
+                        _tslog->info("CLOSED");
                         break;
                   default:
-                        printf("N/A\n");
+                        _tslog->info("N/A\n");
 
             }
          }
 
-         printf("Socket scan complete. Found = %i. SN = %i\n",found,sn);
+         _tslog->info("Socket scan complete. Found = %i. SN = %i\n",found,sn);
    }
 
    if (sn >= W5500_MAX_SOCKETS) {
-      printf("NO SOCKETS AVAILABLE ERROR!");
+      _tslog->info("NO SOCKETS AVAILABLE ERROR!");
       return ;
    }
 
@@ -82,7 +83,7 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
    ss->source_port = source_port;
    ss->protocol = protocol; 
 
-   //printf("New socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
+   //_tslog->info("New socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
 
    ss->connect = &socket_connect;
    ss->close = &socket_close;
@@ -93,12 +94,12 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
    ss->receive = &socket_receive;
    ss->refresh = &socket_refresh;
 
-   //printf("Mid assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
+   //_tslog->info("Mid assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
    w5500_set_socket_SRCPORT(ss->number, ss->source_port);
    w5500_set_socket_MODE(ss->number, W5500_SOCKET_MODE_TCP);
    w5500_set_socket_COMMAND(ss->number, W5500_SOCKET_CMD_OPEN);
 
-   //printf("Final assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
+   //_tslog->info("Final assignment - socket created at %X with id:%i number:%i sourceport:%i protocol:%i\n", ss, ss->id, ss->number, ss->source_port, ss->protocol);
 
    return ss;
    
@@ -250,7 +251,7 @@ LISTEN FUNCTIONS
 
 
 static int socket_listen(socket_t* socket) {
-      printf("Listening on port %i\n",socket->source_port);
+      _tslog->info("Listening on port %i\n",socket->source_port);
 
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_LISTEN);
 
@@ -258,7 +259,7 @@ static int socket_listen(socket_t* socket) {
       while(1) {
             w5500_get_socket_STATUS(socket->number, &socketStatus);
             if (socketStatus==W5500_SOCKET_STATUS_ESTABLISHED) {
-                  printf("Connected.\n");
+                  _tslog->info("Connected.\n");
                   break;
             }
 
@@ -299,7 +300,7 @@ int strtoip(const char *str, address_t *ip) {
 }
 
 char* mactostr(address_t mac, char *buf) {
-      sprintf(buf, "%x:%x:%x:%x:%x:%x\0", mac.a0, mac.a1, mac.a2, mac.a3, mac.a4, mac.a5);
+      _tslog->info(buf, "%x:%x:%x:%x:%x:%x\0", mac.a0, mac.a1, mac.a2, mac.a3, mac.a4, mac.a5);
       return buf;
 }
 
@@ -332,45 +333,45 @@ void dump_socketStatus(socket_t* socket)
 {
         unsigned char socketStatus = 0;
         w5500_get_socket_STATUS(socket->number, &socketStatus);
-        printf("Socket [%i]\n",socket->number);
-        printf("  STATUS = ");
+        _tslog->info("Socket [%i]\n",socket->number);
+        _tslog->info("  STATUS = ");
         switch(socketStatus) {
-                case W5500_SOCKET_STATUS_CLOSED:      printf("CLOSED\n"); break;
-                case W5500_SOCKET_STATUS_INIT:        printf("INIT\n"); break;
-                case W5500_SOCKET_STATUS_LISTEN:      printf("LISTEN\n"); break;
-                case W5500_SOCKET_STATUS_SYNSENT:     printf("SYN_SENT\n"); break;
-                case W5500_SOCKET_STATUS_SYNRECV:     printf("SYN_RECEIVED\n"); break;
-                case W5500_SOCKET_STATUS_ESTABLISHED: printf("ESTABLISHED\n"); break;
-                case W5500_SOCKET_STATUS_FIN_WAIT:    printf("FIN_WAIT\n"); break;
-                case W5500_SOCKET_STATUS_CLOSING:     printf("CLOSING\n"); break;
-                case W5500_SOCKET_STATUS_TIME_WAIT:   printf("TIME_WAIT\n"); break;
-                case W5500_SOCKET_STATUS_CLOSE_WAIT:  printf("CLOSE_WAIT\n"); break;
-                case W5500_SOCKET_STATUS_LAST_ACK:    printf("LAST_ACK\n"); break;
-                case W5500_SOCKET_STATUS_UDP:         printf("UDP\n"); break;
-                case W5500_SOCKET_STATUS_IPRAW:       printf("IPRAW\n"); break;
-                case W5500_SOCKET_STATUS_MACRAW:      printf("MACRAW\n"); break;
-                case W5500_SOCKET_STATUS_PPPOE:       printf("PPPOE\n"); break;
-                default : printf("UNKNOWN [%x]\n",socketStatus); break;
+                case W5500_SOCKET_STATUS_CLOSED:      _tslog->info("CLOSED\n"); break;
+                case W5500_SOCKET_STATUS_INIT:        _tslog->info("INIT\n"); break;
+                case W5500_SOCKET_STATUS_LISTEN:      _tslog->info("LISTEN\n"); break;
+                case W5500_SOCKET_STATUS_SYNSENT:     _tslog->info("SYN_SENT\n"); break;
+                case W5500_SOCKET_STATUS_SYNRECV:     _tslog->info("SYN_RECEIVED\n"); break;
+                case W5500_SOCKET_STATUS_ESTABLISHED: _tslog->info("ESTABLISHED\n"); break;
+                case W5500_SOCKET_STATUS_FIN_WAIT:    _tslog->info("FIN_WAIT\n"); break;
+                case W5500_SOCKET_STATUS_CLOSING:     _tslog->info("CLOSING\n"); break;
+                case W5500_SOCKET_STATUS_TIME_WAIT:   _tslog->info("TIME_WAIT\n"); break;
+                case W5500_SOCKET_STATUS_CLOSE_WAIT:  _tslog->info("CLOSE_WAIT\n"); break;
+                case W5500_SOCKET_STATUS_LAST_ACK:    _tslog->info("LAST_ACK\n"); break;
+                case W5500_SOCKET_STATUS_UDP:         _tslog->info("UDP\n"); break;
+                case W5500_SOCKET_STATUS_IPRAW:       _tslog->info("IPRAW\n"); break;
+                case W5500_SOCKET_STATUS_MACRAW:      _tslog->info("MACRAW\n"); break;
+                case W5500_SOCKET_STATUS_PPPOE:       _tslog->info("PPPOE\n"); break;
+                default : _tslog->info("UNKNOWN [%x]\n",socketStatus); break;
         }
 
         unsigned char protocol;
         w5500_get_socket_MODE(socket->number, &protocol);
-        printf("  MODE = %x\n",protocol);
+        _tslog->info("  MODE = %x\n",protocol);
 
         unsigned short source_port;
         w5500_get_socket_SRCPORT(socket->number, &source_port);
-        printf("  SOURCE PORT = %i\n",source_port);
+        _tslog->info("  SOURCE PORT = %i\n",source_port);
 
         address_t dest_ip;
         w5500_get_socket_DESTIP(socket->number, (unsigned char*) &dest_ip);
         
         char ipBuf[32];
         iptostr(dest_ip, ipBuf);
-        printf("  DEST IP = %s\n",ipBuf);
+        _tslog->info("  DEST IP = %s\n",ipBuf);
         
         unsigned short dest_port;
         w5500_get_socket_DESTPORT(socket->number, &dest_port);
-        printf("  DEST PORT = %i\n",dest_port);
+        _tslog->info("  DEST PORT = %i\n",dest_port);
 
 }
 

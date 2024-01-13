@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-#include "../../tslib/lib/tslib.h"
+#include "../../tslib/src/tslib.h"
 
 #endif

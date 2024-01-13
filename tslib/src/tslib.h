@@ -10,7 +10,7 @@
 #ifndef __TSLIB_DOT_H__
 #define __TSLIB_DOT_H__
 
-typedef unsigned short tslib_size_t;
+typedef uint16_t tslib_size_t;
 
 //////////////////////////////////////
 // TSMEM
@@ -22,61 +22,68 @@ typedef struct tsmem_vtbl {
    int    (*available)();
 } tsmem_vtbl_t;
 tsmem_vtbl_t* tsmem_init();
+void tsmem_shutdown();
+extern tsmem_vtbl_t* _tsmem;
 
 //////////////////////////////////////
 // TSARRAY
 //////////////////////////////////////
-
 typedef struct tsarray_t {
 
    tslib_size_t   count;
    void** data;
 
-   void   (*resize)(struct tsarray_t*, tslib_size_t);
-   void   (*set)(struct tsarray_t*, tslib_size_t, void*);
-   void*  (*get)(struct tsarray_t*, tslib_size_t);
-   void   (*clear)(struct tsarray_t*);
-   void   (*free_callback)(struct tsarray_t*, void*);
 } tsarray_t;
-tsarray_t* tsarray_create(tslib_size_t initialSize);
+
+typedef struct tsarray_vtbl {
+   tsarray_t*   (*new)(tslib_size_t initialSize);
+   void         (*resize)(struct tsarray_t*, tslib_size_t);
+   void         (*set)(struct tsarray_t*, tslib_size_t, void*);
+   void*        (*get)(struct tsarray_t*, tslib_size_t);
+   void         (*clear)(struct tsarray_t*);
+   void         (*free_callback)(struct tsarray_t*, void*);
+} tsarray_vtbl_t;
+tsarray_vtbl_t* tsarray_init();
+void tsarray_shutdown();
+extern tsarray_vtbl_t* _tsarray;
 
 //////////////////////////////////////
 // TSLIST
 //////////////////////////////////////
-
 typedef struct tslist_t {
-
-   tslib_size_t       chunkSize;
-   tslib_size_t       count;
-   tsarray_t* data;
-   
-   void   (*add)(struct tslist_t*, void*);
-   void*  (*get)(struct tslist_t*, tslib_size_t);
-   void   (*set)(struct tslist_t*, tslib_size_t, void*);
-   void   (*insertAt)(struct tslist_t*, tslib_size_t, void*);
-   void   (*removeAt)(struct tslist_t*, tslib_size_t);
-   void   (*clear)(struct tslist_t*);
-   void   (*free_callback)(struct tslist_t*, void*);
+   tslib_size_t     chunkSize;
+   tslib_size_t     count;
+   tsarray_t*       data;
 } tslist_t;
-tslist_t* tslist_create();
+
+typedef struct tslist_vtbl_t {
+   tslist_t*    (*new)();
+   void         (*add)(struct tslist_t*, void*);
+   void*        (*get)(struct tslist_t*, tslib_size_t);
+   void         (*set)(struct tslist_t*, tslib_size_t, void*);
+   void         (*insertAt)(struct tslist_t*, tslib_size_t, void*);
+   void         (*removeAt)(struct tslist_t*, tslib_size_t);
+   void         (*clear)(struct tslist_t*);
+   void         (*free_callback)(struct tslist_t*, void*);
+} tslist_vtbl_t;
+tslist_vtbl_t* tslist_init();
+void tslist_shutdown();
+extern tslist_vtbl_t* _tslist;
 
 //////////////////////////////////////
 // TSSTRING
 //////////////////////////////////////
-// array type definition
 
-struct tsstring_vtbl;
 typedef struct tsstring_t {
    tslib_size_t    buffersize;    // size of the string buffer
    char*  data;          // pointer to the string buffer
-   struct tsstring_vtbl* f;      // pointer to the function vtable
 } tsstring_t;
 
 // tsstring function pointers vtable
 typedef struct tsstring_vtbl {
-   tsstring_t*   (*create)(tslib_size_t initialSize);
-   tsstring_t*   (*create_c)(const char *initString);
-   tsstring_t*   (*create_s)(tsstring_t* initString);
+   tsstring_t*   (*new)(tslib_size_t initialSize);
+   tsstring_t*   (*new_c)(const char *initString);
+   tsstring_t*   (*new_s)(tsstring_t* initString);
    tsstring_t*   (*clone)(tsstring_t* self);
    void          (*clear)(tsstring_t* self);
    void          (*resize)(tsstring_t* self, tslib_size_t count);
@@ -86,9 +93,39 @@ typedef struct tsstring_vtbl {
    tslib_size_t  (*indexof)(tsstring_t* self, const char * search);
    void          (*free)(tsstring_t** self);
 } tsstring_vtbl_t;
-
 tsstring_vtbl_t*  tsstring_init();
+void tsstring_shutdown();
+extern tsstring_vtbl_t* _tsstring;
 
+//////////////////////////////////////
+// TSLOG
+//////////////////////////////////////
+
+#define TSLOG_LEVEL_NONE    0x00
+#define TSLOG_LEVEL_ERROR   0x01
+#define TSLOG_LEVEL_INFO    0x02
+#define TSLOG_LEVEL_VERBOSE 0x04
+#define TSLOG_LEVEL_DEBUG   0x08
+#define TSLOG_LEVEL_ALL     0xFF
+
+typedef struct tslog_vtbl {
+   void (*info)(const char *fmt, ...);
+   void (*error)(const char *fmt, ...);
+   void (*verbose)(const char *fmt, ...);
+   void (*debug)(const char *fmt, ...);
+   uint8_t logMask;
+   char* buffer;
+} tslog_vtbl_t;
+tslog_vtbl_t*     tslog_init();
+void tslog_shutdown();
+extern tslog_vtbl_t* _tslog;
+
+//////////////////////////////////////
+// TSLIB
+//////////////////////////////////////
+
+void tslib_init();
+void tslib_shutdown();
 
 //////////////////////////////////////
 // UTILS
@@ -97,9 +134,6 @@ tsstring_vtbl_t*  tsstring_init();
 void waitMilliseconds(uint32_t ms);
 void waitSeconds(uint32_t seconds);
 
-//void DEBUG_LOG(const char *fmt, ...);
-
-    
 unsigned short Nu_CalcCRC16(uint16_t seed, const unsigned char* ptr, uint32_t count);
 
 char *strdup(const char *s);

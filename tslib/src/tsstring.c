@@ -1,14 +1,45 @@
 #include "tslib.h"
 #include "../../orcadefaults.h"
 
-#pragma noroot
+tsstring_vtbl_t*     _tsstring;
 
-static tsstring_vtbl_t*   _tsstring;
-static tsmem_vtbl_t*      _tsmem;
+static void tsstring_resize(tsstring_t* self, tslib_size_t count) { }
+static short tsstring_compare(tsstring_t* self, tsstring_t* other) { return 0; }
+static void tsstring_insert(tsstring_t* self, char* insertString, tslib_size_t index) { }
+static tsstring_t* tsstring_new(tslib_size_t initialSize);
+static tsstring_t* tsstring_new_c(const char *initString);
+static tsstring_t* tsstring_new_s(tsstring_t* initString);
+static void tsstring_free(tsstring_t **self);
+static tsstring_t*  tsstring_clone(tsstring_t* self);
+static void tsstring_clear(tsstring_t* self); 
+static tslib_size_t  tsstring_indexof(tsstring_t* self, const char *search); 
+static tsstring_t*   tsstring_substring(tsstring_t* self, tslib_size_t start, tslib_size_t count); 
+static tslist_t*  tsstring_split(tsstring_t* self, const char *splitter); 
 
-tsstring_t* tsstring_create(tslib_size_t initialSize) {
+tsstring_vtbl_t* tsstring_init() {
+   if (_tsstring==NULL) {
+      _tsstring = (tsstring_vtbl_t*) malloc(sizeof(tsstring_vtbl_t));
+      _tsstring->new = &tsstring_new;
+      _tsstring->new_c = &tsstring_new_c;
+      _tsstring->new_s = &tsstring_new_s;
+      _tsstring->free = &tsstring_free;
+      _tsstring->clone = &tsstring_clone;
+      _tsstring->clear = &tsstring_clear;
+      _tsstring->compare = &tsstring_compare;
+      _tsstring->resize = &tsstring_resize;
+      _tsstring->split = &tsstring_split;
+      _tsstring->substring = &tsstring_substring;
+      _tsstring->indexof = &tsstring_indexof;
+   }
+   return _tsstring;
+}
+
+void tsstring_shutdown() {
+    freeandnull(_tsstring);
+}
+
+static tsstring_t* tsstring_new(tslib_size_t initialSize) {
    tsstring_t* rv = (tsstring_t*) malloc(sizeof(tsstring_t));
-   rv->f = _tsstring;
    if (initialSize>0) {
       char *buffer = (char*) malloc(initialSize);
       if (buffer != NULL) {
@@ -19,22 +50,21 @@ tsstring_t* tsstring_create(tslib_size_t initialSize) {
    return rv;
 }
 
-tsstring_t* tsstring_create_c(const char *initString) {
+static tsstring_t* tsstring_new_c(const char *initString) {
    if (initString==NULL) return NULL;
    tslib_size_t ilen = strlen(initString);
-   tsstring_t* rv = _tsstring->create(ilen+1);
+   tsstring_t* rv = _tsstring->new(ilen+1);
    _tsmem->copy(rv->data, initString, ilen);
-   //printf("got a string @ %x\nval = %s\ntsmem @ %x\ncopy=%x\n",(int) rv, rv->data, (int) tsmem,(tsmem->copy));
    rv->data[ilen] = 0;
    return rv;
 }
 
-tsstring_t* tsstring_create_s(tsstring_t* initString) {
+static tsstring_t* tsstring_new_s(tsstring_t* initString) {
    if (initString==NULL) return NULL;
-   return _tsstring->create_c(initString->data);
+   return _tsstring->new_c(initString->data);
 }
 
-void tsstring_free(tsstring_t **self) {
+static void tsstring_free(tsstring_t **self) {
    if (self==NULL) return;
    tsstring_t* p = *self;
    if (p!=NULL) {
@@ -47,88 +77,58 @@ void tsstring_free(tsstring_t **self) {
    self = NULL;
 }
 
-tsstring_t*  tsstring_clone(tsstring_t* self) {
-   return _tsstring->create_s(self);
+static tsstring_t* tsstring_clone(tsstring_t* self) {
+   return _tsstring->new_s(self);
 }
 
-void          tsstring_clear(tsstring_t* self) {
+static void tsstring_clear(tsstring_t* self) {
    _tsmem->zero(self->data,self->buffersize);
 }
 
-tslib_size_t  tsstring_indexof(tsstring_t* self, const char *search) {
+static tslib_size_t tsstring_indexof(tsstring_t* self, const char *search) {
    char* ptr = strstr(self->data, search);
    if (ptr==NULL) return -1;
    return (tslib_size_t) (ptr - self->data);
 }
 
-tsstring_t*   tsstring_substring(tsstring_t* self, tslib_size_t start, tslib_size_t count) { 
+static tsstring_t* tsstring_substring(tsstring_t* self, tslib_size_t start, tslib_size_t count) { 
    char* temp = (char*) malloc(count+1);
    _tsmem->zero(temp,count+1);
    _tsmem->copy(temp, (self->data)+start, count);
-   tsstring_t* rv = _tsstring->create_c(temp);
+   tsstring_t* rv = _tsstring->new_c(temp);
    free(temp);
    return rv;
 }
 
-tslist_t*  tsstring_split(tsstring_t* self, const char *splitter) {
+static tslist_t* tsstring_split(tsstring_t* self, const char *splitter) {
 
-   //printf("splitting source string [%s] based in splitter of [%s]\n", self->data, splitter);
    short idx = 0;
    short splen = strlen(splitter);
    short slen = strlen((const char*) self->data);
    int spos = 0;
    char* sptr = (char*) self->data;
    char* found = NULL;
-   tslist_t* rv = tslist_create(8);
+
+   tslist_t* rv = _tslist->new(8);
+
    do {
-      printf("looking for splits\n");
       found = strstr(sptr, splitter);
       idx = -1;
       if (found) {
          idx = found - sptr;
-         printf("found splitter at index %i\n", idx);
-         tsstring_t* item = self->f->substring(self,spos,idx);
-         printf("segment is [%s]\n", item->data);
-         rv->add(rv, item);
+         tsstring_t* item = _tsstring->substring(self,spos,idx);
+         _tslist->add(rv, item);
          spos += (idx + splen);
          sptr += (idx + splen);
       }
    } while(idx != -1);
    
    if (spos < slen) {
-      tsstring_t* last = self->f->substring(self, spos, slen-spos);
-      rv->add(rv, last);
+      tsstring_t* last = _tsstring->substring(self, spos, slen-spos);
+      _tslist->add(rv, last);
    }
-   printf("returning %i segments\n",(int)rv->count);
    return rv;
 }
 
-void          tsstring_resize(tsstring_t* self, tslib_size_t count) { }
-short         tsstring_compare(tsstring_t* self, tsstring_t* other) { return 0; }
-void          tsstring_insert(tsstring_t* self, char* insertString, tslib_size_t index) { }
-
-
-
-tsstring_vtbl_t* tsstring_init() {
-   _tsmem = tsmem_init();
-   if (_tsstring==NULL) {
-      _tsstring = (tsstring_vtbl_t*) malloc(sizeof(tsstring_vtbl_t));
-      _tsstring->create = &tsstring_create;
-      _tsstring->create_c = &tsstring_create_c;
-      _tsstring->create_s = &tsstring_create_s;
-      _tsstring->free = &tsstring_free;
-      _tsstring->clone = &tsstring_clone;
-      _tsstring->clear = &tsstring_clear;
-      _tsstring->compare = &tsstring_compare;
-      _tsstring->resize = &tsstring_resize;
-      _tsstring->split = &tsstring_split;
-      _tsstring->substring = &tsstring_substring;
-      _tsstring->indexof = &tsstring_indexof;
-      //printf("tsstring=%x\n",(int) tsstring);
-      //printf("tsstring.create=%x\n",(int)(tsstring->create));
-      //printf("tsstring.create_c=%x\n",(int)(tsstring->create_c));
-   }
-   return _tsstring;
-}
 
 

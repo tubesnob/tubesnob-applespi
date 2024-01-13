@@ -3,21 +3,24 @@
 
 #pragma noroot
 
+static tslog_vtbl_t* _log;
+
 int spiws_init_w5500(config_t* config)
 {
+        _log = tslog_init(TSLOG_LEVEL_VERBOSE);
 
-        printf("Initializing SPI ... \n");
+        _tslog->info("Initializing SPI ... \n");
         spi_init();
 
-        printf("Initializing W5500 ... ");
+        _tslog->info("Initializing W5500 ... ");
         w5500_init();
-        printf("OK\n");
+        _tslog->info("OK\n");
 
-        printf("Resetting W5500 ... ");
+        _tslog->info("Resetting W5500 ... ");
         w5500_reset();
-        printf("OK\n");
+        _tslog->info("OK\n");
 
-        printf("Setting W5500 LAN Properties ... ");
+        _tslog->info("Setting W5500 LAN Properties ... ");
         address_t source_hwaddr;
         strtomac(config->source_macaddr, &source_hwaddr);
         w5500_set_SRCMAC((uint8_t*) source_hwaddr);
@@ -37,11 +40,11 @@ int spiws_init_w5500(config_t* config)
 
         w5500_set_GWADDR((uint8_t*) source_gwaddr);
 
-        printf("OK\n");
+        _tslog->info("OK\n");
 
         w5500_phycfg_t phy;
         w5500_get_PHYCFG(&phy);
-        printf("PHY = %i\n",phy.link_status);
+        _tslog->info("PHY = %i\n",phy.link_status);
 
         return 0;
        
