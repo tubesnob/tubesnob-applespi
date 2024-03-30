@@ -19,6 +19,7 @@ tslog_vtbl_t* tslog_init() {
         rv->buffer = (char*) malloc(0x400);
         return _tslog = rv;
     }
+    return _tslog;
 }
 
 void tslog_shutdown() {

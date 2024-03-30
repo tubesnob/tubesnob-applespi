@@ -24,8 +24,12 @@ void tsmem_shutdown() {
     freeandnull(_tsmem);
 }
 
-static int tsmem_avail() { 
+static int tsmem_avail() {
+   #ifdef __MACOS__
+   return 1;
+   #else 
    return FreeMem();
+   #endif
 }
 
 static void tsmem_copy(const char *dest, const char *src, tslib_size_t count) { 

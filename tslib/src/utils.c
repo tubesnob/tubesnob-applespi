@@ -45,7 +45,7 @@ static inline void update_debug_time() {
    time(&__debug_log_time_val);
    __debug_log_local_time = localtime(&__debug_log_time_val);
    struct tm* t = __debug_log_local_time;
-   sprintf(__debug_buffer,"%04i%02i%02i-%02i%02i%02i.%02i\0",t->tm_year==118?2018:t->tm_year,t->tm_mon,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec,(unsigned int)(__debug_log_clock_val%60));
+   sprintf(__debug_buffer,"%04i%02i%02i-%02i%02i%02i.%02i",t->tm_year==118?2018:t->tm_year,t->tm_mon,t->tm_mday,t->tm_hour,t->tm_min,t->tm_sec,(unsigned int)(__debug_log_clock_val%60));
 }
 
 char *strdup(const char *s) {

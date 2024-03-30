@@ -57,7 +57,7 @@ typedef struct tslist_t {
 } tslist_t;
 
 typedef struct tslist_vtbl_t {
-   tslist_t*    (*new)();
+   tslist_t*    (*new)(tslib_size_t size);
    void         (*add)(struct tslist_t*, void*);
    void*        (*get)(struct tslist_t*, tslib_size_t);
    void         (*set)(struct tslist_t*, tslib_size_t, void*);

@@ -21,6 +21,10 @@
  #pragma alloca
 #endif
 //#include <string.h> //for strncmp
+#ifdef __MACOS__
+#include <string.h>
+#include <stdlib.h>
+#endif
 #if defined (WIN32)
 #include <malloc.h>
 #endif
@@ -28,7 +32,9 @@
 #include "config.h"
 #endif
 #ifdef __GNUC__
+#ifndef __MACOS__
 #define alloca __builtin_alloca
+#endif
 #else /* not __GNUC__ */
 #if defined (HAVE_ALLOCA_H) || (defined(sparc) && (defined(sun) || (!defined(USG) && !defined(SVR4) && !defined(__svr4__))))
 #include <alloca.h>
@@ -63,7 +69,9 @@ char *alloca ();
 #include <stdlib.h>
 #else	/* Not GNU C library.  */
 //#define	__alloca	alloca
+#ifndef __MACOS__
 #define	__alloca	malloc
+#endif
 #endif	/* GNU C library.  */
 /* If GETOPT_COMPAT is defined, `+' as well as `--' can introduce a
    long-named option.  Because this is not POSIX.2 compliant, it is
