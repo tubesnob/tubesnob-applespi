@@ -1,32 +1,10 @@
-LIBFILENAME=tslib.a
+LIBFILENAME=tslib.o
 SRC=getopt.c nucrc16.c tslist.c tsmem.c utils.c ini.c tsarray.c tslog.c tsstring.c
 OBJ=$(SRC:.c=.o)
-DOIIX=false
 
-macos: macos_vars all
+include ../../Makefile.env.include
 
-macos_vars:
-	$(eval MAKELIB=libtool)
-	$(eval MAKELIBOPTS=-static -o )
-	$(eval CC=clang)
-	$(eval CCOPTS= -c -D__MACOS__)
-
-apple2gs: apple2gs_vars all
-
-apple2gs_vars:
-	$(eval MAKELIB=iix makelib)
-	$(eval MAKELIBOPTS=)
-	$(eval CC=iix compile)
-	$(eval CCOPTS=+O -D -P )
-	
-dump:
-	@echo "MAKELIB=$(MAKELIB)"
-	@echo "MAKELIBOPTS=$(MAKELIBOPTS)"
-	@echo "CC=$(CC)"
-	@echo "CCOPTS=$(CCOPTS)"
-	@echo "DOIIX=$(DOIIX)"
-
-all: clean dump $(LIBFILENAME)
+all: clean $(LIBFILENAME)
 
 $(LIBFILENAME): $(OBJ)
 		@echo "Linking ($@) with ($^) DOIIX=$(DOIIX)"
@@ -43,14 +21,11 @@ endif
 ifeq ($(DOIIX), true)
 	@$(CC) $(CCOPTS) $<
 else
-	@$(CC) $(CCOPTS) -o $@ $<
+	@$(CC) $(CCOPTS) -c $< -o $@
 endif
-
-debug:
-	@echo "obj: $(OBJ)"
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root)
+	$(RM) $(LIBFILENAME) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root)
 	
 

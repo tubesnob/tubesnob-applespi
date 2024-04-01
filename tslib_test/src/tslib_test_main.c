@@ -1,4 +1,4 @@
-#include "tslib_test.h";
+#include "tslib_test.h"
 #include "../../orcadefaults.h"
 
 void test_tsstring();
