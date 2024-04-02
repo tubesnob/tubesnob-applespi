@@ -129,6 +129,8 @@ int w5500_socket_write_data(unsigned char socketNumber, unsigned char *buf, WORD
 
         w5500_set_socket_TX_WRITEPTR(socketNumber,index);
 
+        return size;
+
 }
 
 int w5500_socket_read_data(unsigned char socketNumber, unsigned char *buf, WORD size) {
@@ -138,6 +140,7 @@ int w5500_socket_read_data(unsigned char socketNumber, unsigned char *buf, WORD 
         w5500_read_mult(index,_bsb.sockets[socketNumber].socket_rx_buffer,buf,size);
         index += size;
         w5500_set_socket_RX_READPTR(socketNumber, index);
+        return size;
 }
 
 
@@ -278,5 +281,7 @@ int w5500_dump_state() {
         free(rbuf);
 
         _tslog->info("###########################\n");
+
+        return 0;
         
 }

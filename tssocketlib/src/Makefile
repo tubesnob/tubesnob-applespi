@@ -1,5 +1,5 @@
-LIBFILENAME=tslib.o
-SRC=getopt.c nucrc16.c tslist.c tsmem.c utils.c ini.c tsarray.c tslog.c tsstring.c
+LIBFILENAME=tssocketlib.o
+SRC=tssocketlib_main.c tssocketlib_w5500.c
 OBJ=$(SRC:.c=.o)
 
 include ../../Makefile.env.include
@@ -26,6 +26,6 @@ endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) 
+	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root)
 	
 

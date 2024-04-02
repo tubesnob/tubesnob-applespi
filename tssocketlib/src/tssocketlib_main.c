@@ -74,7 +74,7 @@ socket_t* socket_create(unsigned char protocol, unsigned short source_port)
 
    if (sn >= W5500_MAX_SOCKETS) {
       _tslog->info("NO SOCKETS AVAILABLE ERROR!");
-      return ;
+      return NULL;
    }
 
    socket_t* ss = (socket_t*) malloc(sizeof(socket_t));
@@ -111,19 +111,22 @@ static int socket_close(socket_t* socket)
 }
 
 static int socket_connect(socket_t* socket) {
-      w5500_set_socket_DESTIP(socket->number, (unsigned char*) socket->dest_ip);
+      w5500_set_socket_DESTIP(socket->number, (unsigned char*) &socket->dest_ip);
       w5500_set_socket_DESTPORT(socket->number, socket->dest_port);
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_CONNECT);
       socket_refresh(socket);
+      return SOCKET_OK;
 }
 
 static int socket_refresh(socket_t *socket) {
       w5500_get_socket_STATUS(socket->number, &socket->status);
       w5500_get_socket_RX_RECVSIZE(socket->number, &socket->rx_bytes_available);
+      return SOCKET_OK;
 }
 
 static int socket_disconnect(socket_t* socket) {
       w5500_set_socket_COMMAND(socket->number, W5500_SOCKET_CMD_DISCON);
+      return SOCKET_OK;
 }
 
 /*
@@ -150,7 +153,7 @@ static int socket_send(socket_t *socket, unsigned char *buf, unsigned short leng
             }
 
             // wait until we get the send ok signal from the socket
-            while (!socketInterruptStatus & W5500_SOCKET_INTERRUPT_SENDOK) {
+            while ((!socketInterruptStatus) & W5500_SOCKET_INTERRUPT_SENDOK) {
                   w5500_get_socket_INTERRUPT(socket->number, &socketInterruptStatus);
             }
 
@@ -208,7 +211,7 @@ static int socket_receive(socket_t *socket, unsigned char *buf, unsigned short l
             }
 
             // wait until we get the send ok signal from the socket
-            while (!socketInterruptStatus & W5500_SOCKET_INTERRUPT_RECV) {
+            while ((!socketInterruptStatus) & W5500_SOCKET_INTERRUPT_RECV) {
                   w5500_get_socket_INTERRUPT(socket->number, &socketInterruptStatus);
             }
 
@@ -284,7 +287,7 @@ UTILITY FUNCTIONS
 
 
 char* iptostr(address_t ip, char* buf) {
-      sprintf(buf, "%i.%i.%i.%i\0", ip.a0, ip.a1, ip.a2, ip.a3);
+      sprintf(buf, "%i.%i.%i.%i", ip.a0, ip.a1, ip.a2, ip.a3);
       return buf;
 }
 
@@ -297,6 +300,7 @@ int strtoip(const char *str, address_t *ip) {
       ip->a3 = (unsigned char) a3;
       ip->a4 = 0x00;
       ip->a5 = 0x00;
+      return 0;
 }
 
 char* mactostr(address_t mac, char *buf) {
@@ -313,6 +317,7 @@ int strtomac(const char *str, address_t *mac) {
       mac->a3 = (unsigned char) a3;
       mac->a4 = (unsigned char) a4;
       mac->a5 = (unsigned char) a5;
+      return 0;
 }
 
 address_t* addrcpy(address_t* dest, const address_t* source) {

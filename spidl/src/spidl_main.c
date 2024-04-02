@@ -1,6 +1,7 @@
 #include "spidl.h"
 #include "../../tslib/src/tslib.h"
 #include "../../tslib/src/getopt.h"
+#include "../../tsspilib/src/tsspilib.h"
 #include "../../tssocketlib/src/tssocketlib_w5500.h"
 #include "../../tssocketlib/src/tssocketlib.h"
 
@@ -152,7 +153,7 @@ int main(int argc, char** argv)
 
     // send the command to the destination
     _tslog->info("Requesting file [%s]\n", config->file_name);
-    sprintf(sendCommand,"SENDFILE\n%s\n%i\n\0",config->file_name,config->packet_size);
+    sprintf(sendCommand,"SENDFILE\n%s\n%i\n",config->file_name,config->packet_size);
     socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
 
     uint16_t packetHeaderSize = sizeof(data_packet_t);
@@ -167,7 +168,7 @@ int main(int argc, char** argv)
 
     if (packet->packetNumber !=0) {
             _tslog->error("Invalid packet header\nExiting\n");
-            return;
+            return 0;
     }
 
     unsigned long totalFileSize = packet->packetDataLength;
@@ -189,7 +190,7 @@ int main(int argc, char** argv)
     uint16_t workPacketNumber = 1;
     while(workPacketNumber <= packet->totalNumberOfPackets) {
 
-            sprintf(sendCommand,"sendpacket\n%i\n\0",workPacketNumber);
+            sprintf(sendCommand,"sendpacket\n%i\n",workPacketNumber);
 
             _tslog->info("[%i/%i] : S", workPacketNumber, (unsigned int) packet->totalNumberOfPackets);
             socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
@@ -221,7 +222,7 @@ int main(int argc, char** argv)
     _tslog->info("File Saved\n");
 
     _tslog->info("Ending Session w/ Host\n");
-    sprintf(sendCommand,"quit\n\0");
+    sprintf(sendCommand,"quit\n");
     socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
 
     _tslog->info("Closing Connection\n");

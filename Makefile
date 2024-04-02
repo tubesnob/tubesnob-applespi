@@ -1,16 +1,21 @@
 include Makefile.env.include
 
-all: 
+all:
 	$(MAKE) -C tslib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tsspilib/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C tssocketlib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tslib_test/SRC $@ DOIIX=$(DOIIX)
-	
+	$(MAKE) -C tssocketlib_test/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C spidl/SRC $@ DOIIX=$(DOIIX)
 
 clean: 
 	$(MAKE) -C tslib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tsspilib/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C tssocketlib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tslib_test/SRC $@ DOIIX=$(DOIIX)
-	
+	$(MAKE) -C tssocketlib_test/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C spidl/SRC $@ DOIIX=$(DOIIX)
+
 include Makefile.env.debug
 
 

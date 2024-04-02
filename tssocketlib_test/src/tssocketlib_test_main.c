@@ -97,7 +97,7 @@ int main(int argc, char** argv)
         _tslog->info("Total Elapsed = %f seconds. BPS=%f\n",elapsedSeconds2,uint8_tsPerSecond);
         _tslog->info("Total uint8_ts Received = %i\n",totalBytesReceived);
 
-        return;
+        return 0;
 
         int longCount = 10000;
         while(longCount--) {
