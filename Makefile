@@ -7,6 +7,7 @@ all:
 	$(MAKE) -C tslib_test/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tssocketlib_test/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C spidl/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C spiws/SRC $@ DOIIX=$(DOIIX)
 
 clean: 
 	$(MAKE) -C tslib/SRC $@ DOIIX=$(DOIIX)
@@ -15,6 +16,7 @@ clean:
 	$(MAKE) -C tslib_test/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tssocketlib_test/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C spidl/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C spiws/SRC $@ DOIIX=$(DOIIX)
 
 include Makefile.env.debug
 

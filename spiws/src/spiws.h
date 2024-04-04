@@ -4,10 +4,10 @@
 #include <stdarg.h>
 #include <time.h>
 
-#include "../../tslib/lib/tslib.h"
-#include "../../tsspilib/lib/tsspilib.h"
-#include "../../tssocketlib/lib/tssocketlib.h"
-#include "../../tssocketlib/lib/tssocketlib_w5500.h"
+#include "../../tslib/src/tslib.h"
+#include "../../tsspilib/src/tsspilib.h"
+#include "../../tssocketlib/src/tssocketlib.h"
+#include "../../tssocketlib/src/tssocketlib_w5500.h"
 
 #ifndef __SPIWS_DOT_H__
 #define __SPIWS_DOT_H__

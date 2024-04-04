@@ -1,4 +1,4 @@
-#include "spiws.h";
+#include "spiws.h"
 #include "../../orcadefaults.h"
 
 #pragma noroot
@@ -7,11 +7,17 @@ static tslog_vtbl_t* _log;
 
 int spiws_init_w5500(config_t* config)
 {
-        _log = tslog_init(TSLOG_LEVEL_VERBOSE);
+    printf("a");
 
+        _log = tslog_init();
+
+printf("b");
+    
         _tslog->info("Initializing SPI ... \n");
         spi_init();
 
+printf("c");
+    
         _tslog->info("Initializing W5500 ... ");
         w5500_init();
         _tslog->info("OK\n");
@@ -23,22 +29,22 @@ int spiws_init_w5500(config_t* config)
         _tslog->info("Setting W5500 LAN Properties ... ");
         address_t source_hwaddr;
         strtomac(config->source_macaddr, &source_hwaddr);
-        w5500_set_SRCMAC((uint8_t*) source_hwaddr);
+        w5500_set_SRCMAC((uint8_t*) &source_hwaddr);
         
         address_t source_ipaddr;
         strtoip(config->source_ipaddr, &source_ipaddr);
 
-        w5500_set_SRCIP((uint8_t*) source_ipaddr);
+        w5500_set_SRCIP((uint8_t*) &source_ipaddr);
 
         address_t source_mask;
         strtoip(config->source_mask, &source_mask);
 
-        w5500_set_SUBMASK((uint8_t*) source_mask);
+        w5500_set_SUBMASK((uint8_t*) &source_mask);
         
         address_t source_gwaddr;
         strtoip(config->source_gwaddr, &source_gwaddr);
 
-        w5500_set_GWADDR((uint8_t*) source_gwaddr);
+        w5500_set_GWADDR((uint8_t*) &source_gwaddr);
 
         _tslog->info("OK\n");
 

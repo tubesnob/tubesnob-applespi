@@ -1,4 +1,4 @@
-#include "spiws.h";
+#include "spiws.h"
 #include "../../orcadefaults.h"
 
 #pragma noroot
@@ -190,6 +190,7 @@ int spiws_server_streamreader(socket_t* socket, uint8_t *linebuffer, int size) {
 int  spiws_server_streamwriter(socket_t* socket, uint8_t* buffer, int size) {
         //_tslog->info("[SEND] %s\n",buffer);
         socket->send(socket,buffer,size);
+        return size;
 }
 
 
