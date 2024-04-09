@@ -4,6 +4,11 @@
 #pragma optimize -1
 #pragma ignore 0x0018
 
+#ifndef NULL
+#define NULL 0
+#endif
+
+#define null
 static int __useTimeTool = 0;
 
 typedef unsigned int    uint32_t;

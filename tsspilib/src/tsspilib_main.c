@@ -1,27 +1,43 @@
 #include "tsspilib.h"
 
+static tsspilib_device_vtbl_t* _spiDevice;
 
-void spi_init() {
+int spi_init(tsspilib_device_vtbl_t* spidev) {
+    spi_shutdown();
+    _spiDevice = spidev;
+    return SPI_OK;
 }
 
-void spi_shutdown() {
+int spi_shutdown() {
+    int rv = SPI_OK;
+    if (_spiDevice) {
+        rv = _spiDevice->tsspilib_device_shutdown();
+        _spiDevice = NULL;
+    }
+    return rv;
 }
 
-void spi_begin_trans() {
-    SCLK_OFF;
-    SSEL_OFF;
+int  spi_begin_trans() {
+    if (!_spiDevice)
+        return SPI_NODEVICE;
+    return _spiDevice->tsspilib_device_begin_trans();
 }
 
-void spi_end_trans() {
-    SSEL_ON;
-    SCLK_OFF;
+int spi_end_trans() {
+    if (!_spiDevice)
+        return SPI_NODEVICE;
+    return _spiDevice->tsspilib_device_end_trans();
 }
 
 int spi_write(uint8_t *txbuf, uint16_t txsize) {
-    return spisendb(txbuf, txsize);
+    if (!_spiDevice)
+        return SPI_NODEVICE;
+    return _spiDevice->tsspilib_device_write(txbuf, txsize);
 }
 
 int spi_read(uint8_t* rxbuf, uint16_t rxsize) {
-    return spireadb(rxbuf, rxsize);
+    if (!_spiDevice)
+        return SPI_NODEVICE;
+    return _spiDevice->tsspilib_device_read(rxbuf, rxsize);
 }
 
