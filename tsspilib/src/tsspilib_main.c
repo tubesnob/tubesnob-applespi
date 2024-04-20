@@ -5,7 +5,7 @@ static tsspilib_device_vtbl_t* _spiDevice;
 int spi_init(tsspilib_device_vtbl_t* spidev) {
     spi_shutdown();
     _spiDevice = spidev;
-    return SPI_OK;
+    return _spiDevice->tsspilib_device_init();
 }
 
 int spi_shutdown() {

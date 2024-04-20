@@ -53,6 +53,7 @@ static int a2gpio_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
 }
 
 
+
 tsspilib_device_vtbl_t* a2gpio_spi_driver_load() {
     tsspilib_device_vtbl_t* rv = (tsspilib_device_vtbl_t*) malloc(sizeof(tsspilib_device_vtbl_t));
     rv->tsspilib_device_init = &a2gpio_spi_init;
@@ -63,6 +64,7 @@ tsspilib_device_vtbl_t* a2gpio_spi_driver_load() {
     rv->tsspilib_device_read = &a2gpio_spi_read;
     return rv;
 }
+
 
 
 

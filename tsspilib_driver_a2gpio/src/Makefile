@@ -23,23 +23,23 @@ else
 endif
 
 %.o: %.c
-	@echo "Compiling C ($@) with ($^) DOIIX=$(DOIIX)"
+	@echo "Compiling C ($@) with ($^) DOIIX=$(DOIIX) CCOPTS=$(CCOPTS)"
 ifeq ($(DOIIX), true)
-	@$(CC) $(CCOPTS) $<
+	@$(CC) $(CCOPTS) $< 
 else
-	@$(CC) $(CCOPTS) -c $< -o $@
+	@$(CC) $(CCOPTS) -c $< -o $@ 
 endif
 
 %.ROOT: %.asm
 	@echo "Compiling ASM ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-	@$(CC) $(CCOPTS) $<
+	$(CC) $(CCOPTS) $< cc=-DAPPLE2GS
 else
 	@$(CC) $(CCOPTS) -c $< -o $@
 endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) *.ROOT
+	$(RM) $(LIBFILENAME) *.o *.sym *.a *.root *.ROOT
 	
 

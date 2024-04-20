@@ -1,7 +1,7 @@
 #include "../../orcadefaults.h"
 
-#ifndef __SPIDL_DOT_H__
-#define __SPIDL_DOT_H__
+#ifndef __FTDITEST_DOT_H__
+#define __FTDITEST_DOT_H__
 
 typedef struct {
         unsigned long packetNumber;

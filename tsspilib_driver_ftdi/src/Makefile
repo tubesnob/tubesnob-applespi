@@ -1,6 +1,13 @@
-LIBFILENAME=tsspilib.o
-SRC=tsspilib_main.c
-OBJ=tsspilib_main.o
+LIBFILENAME=tsspilib_ftdi.o
+
+ifeq ($(DOIIX), true)
+SRC=tsspilib_ftdi_dummy.c
+OBJ=tsspilib_ftdi_dummy.o
+else
+LINKDEPS=/usr/local/lib/libftdi1.dylib 
+SRC=tsspilib_ftdi_main.c
+OBJ=tsspilib_ftdi_main.o
+endif 
 
 include ../../Makefile.env.include
 
@@ -13,7 +20,7 @@ ifeq ($(DOIIX), true)
 		$(eval TRX2=$(TRX:.o=.a))
 		$(MAKELIB) $(MAKELIBOPTS) $@ $(TRX2)
 else
-		$(MAKELIB) $(MAKELIBOPTS) $@ $(OBJ)
+		$(MAKELIB) $(MAKELIBOPTS) $@ $(OBJ) $(LINKDEPS)
 endif
 
 %.o: %.c
@@ -34,6 +41,5 @@ endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) *.ROOT
-	
+	$(RM) $(LIBFILENAME) *.o *.sym *.a *.root *.ROOT	
 

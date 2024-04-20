@@ -8,6 +8,10 @@
 		"workbench.sideBar.location": "right",
 		"workbench.editor.enablePreview": false,
 		"workbench.list.openMode": "doubleClick",
-		"terminal.integrated.tabStopWidth": 4
+        "terminal.integrated.tabStopWidth": 4,
+        "files.associations": {
+            "A": "A",
+            "stdlib.h": "c"
+        }
 	}
 }
