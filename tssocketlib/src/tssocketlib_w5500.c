@@ -26,9 +26,7 @@ int w5500_init() {
       _bsb.sockets[socketNumber].socket_rx_buffer = ((socketNumber << 2) | 0x03) << 3;
    }
 
-while(1) {
    w5500_reset();
-}
 
         //w5500_phycfg_t phycfg;
         //phycfg.opmode_set = 1;
@@ -163,8 +161,15 @@ int w5500_write_mult(int address, unsigned char bsb, unsigned char* data, WORD s
         _spi_header_buffer[2] = bsb | W5500_RWB_WRITE | W5500_OMB_VDM;
  
         spi_begin_trans();
-        spi_write(_spi_header_buffer, 3);
-        spi_write(data, size);
+
+        WORD outbufsize = 3 + size;
+        uint8_t* outbuf = (uint8_t*) malloc(outbufsize);
+        if (outbuf) {
+            memcpy(outbuf,_spi_header_buffer, 3);
+            memcpy(&outbuf[3], data, size);
+            spi_write(outbuf,outbufsize);
+            free(outbuf);
+        }
         spi_end_trans();
 
         return W5500_OK;

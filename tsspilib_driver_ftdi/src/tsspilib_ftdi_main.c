@@ -28,10 +28,19 @@ struct ftdi_version_info    __ftdi_version;
 #define FTDI_HANDLE_ERROR_FATAL(ftdicode,opstring,retval) if (ftdicode < 0) { printf("FTDI: Error with operation [%s] error=0x%X\n", opstring, ftdicode); return retval; }
 #define FTDI_HANDLE_ERROR(ftdicode,opstring) if (ftdicode < 0) { printf("FTDI: Error with operation [%s] error=0x%X\n", opstring, ftdicode); }
 #define TOSTRING(x) ""#x
+
+// Set these pins high
+// everything should be LOW except for SSEL
+const unsigned char __pinInitialState = PIN_SSEL;
+   
+// Use these pins as outputs
+const unsigned char __pinDirection = PIN_SCLK | PIN_MOSI | PIN_SSEL;
+
 static int ftdi_spi_init() {
 
     int ret;
 
+    printf("FTDI: Creating FTDI Device Context\n");
     if ((__ftdi = ftdi_new()) == 0)
     {
         printf("FTDI: Could not allocate new FTDI context\n");
@@ -41,6 +50,7 @@ static int ftdi_spi_init() {
     __ftdi_version = ftdi_get_library_version();
     printf("FTDI: Initialized libftdi %s (major: %d, minor: %d, micro: %d, snapshot ver: %s)\n",__ftdi_version.version_str, __ftdi_version.major, __ftdi_version.minor, __ftdi_version.micro,__ftdi_version.snapshot_str);
 
+    printf("FTDI: Opening USB Device [%X:%X]\n", USB_MAJOR, USB_MINOR);
     if ((ret = ftdi_usb_open(__ftdi, USB_MAJOR, USB_MINOR)) < 0)
     {
         printf("FTDI: unable to open ftdi device @ (%X:%X): %d (%s)\n", USB_MAJOR, USB_MINOR, ret, ftdi_get_error_string(__ftdi));
@@ -59,43 +69,47 @@ static int ftdi_spi_init() {
     FTDI_HANDLE_ERROR_FATAL(ret,"READ CHIPID",SPI_ERROR)
     printf("FTDI: Chip ID is %X\n", chipid);
 
+    printf("FTDI: Resetting USB\n");
     ret = ftdi_usb_reset(__ftdi);
     FTDI_HANDLE_ERROR_FATAL(ret,"USB RESET", SPI_ERROR)
 
+    printf("FTDI: Setting interface to ANY\n");
     ret = ftdi_set_interface(__ftdi, INTERFACE_ANY);
     FTDI_HANDLE_ERROR_FATAL(ret,"SET INTERFACE", SPI_ERROR)
 
+    printf("FTDI: Resetting Device\n");
     ret = ftdi_set_bitmode(__ftdi, 0, 0); // reset
     FTDI_HANDLE_ERROR_FATAL(ret,"RESET DEVICE", SPI_ERROR)
     
+    printf("FTDI: Enabling MPSSE on all bits\n");
     ret = ftdi_set_bitmode(__ftdi, 0, BITMODE_MPSSE); // enable mpsse on all bits
     FTDI_HANDLE_ERROR_FATAL(ret,"ENABLE MPSSE", SPI_ERROR)
 
+    printf("FTDI: Purging USB Buffers\n");
     ret = ftdi_usb_purge_buffers(__ftdi);
     FTDI_HANDLE_ERROR_FATAL(ret,"PURGE BUFFERS", SPI_ERROR)
 
     usleep(50000); // sleep 50 ms for setup to complete
 
-    // Set these pins high
-    // everything should be LOW except for SSEL
-    const unsigned char pinInitialState = PIN_SSEL;
-   
-    // Use these pins as outputs
-    const unsigned char pinDirection = PIN_SCLK | PIN_MOSI | PIN_SSEL;
 
+    // Setup MPSSE; Operation code followed by 0 or more arguments.
+    unsigned int icmd = 0;
+    unsigned char buf[256] = {0};
+    buf[icmd++] = TCK_DIVISOR;     // opcode: set clk divisor
+    buf[icmd++] = 0x05;            // argument: low bit. 60 MHz / (5+1) = 1 MHz
+    buf[icmd++] = 0x00;            // argument: high bit.
+    buf[icmd++] = DIS_ADAPTIVE;    // opcode: disable adaptive clocking
+    buf[icmd++] = DIS_3_PHASE;     // opcode: disable 3-phase clocking
+    buf[icmd++] = SET_BITS_LOW;    // opcode: set low bits (ADBUS[0-7])
+    buf[icmd++] = __pinInitialState; // argument: inital pin states
+    buf[icmd++] = __pinDirection;    // argument: pin direction
+    // Write the setup to the chip.
 
-    // set all pins to output, and then set pin 3 (0x08) to input
-    __ftdi_pins[0] = 0xFF;
-    CLEAR_PIN(PIN_MISO);
-    ret = ftdi_set_bitmode(__ftdi, __ftdi_pins[0], BITMODE_BITBANG );
-    if (ret < 0) {
-        printf("FTDI: Could not enable bitbang mode. %d\n", ret);
-        return SPI_NODEVICE;
-    }
+    printf("FTDI: Setting initial SPI mode\n");
+    ret = ftdi_write_data(__ftdi, buf, icmd);
+    FTDI_HANDLE_ERROR_FATAL(ret, "SET INITIAL MODE", SPI_ERROR)
 
-    // set everything low
-    __ftdi_pins[0] = 0x00;
-    ftdi_write_data(__ftdi, __ftdi_pins, 1);
+    ftdi_usb_purge_tx_buffer(__ftdi);
 
     return SPI_OK;
 }
@@ -108,110 +122,95 @@ static int ftdi_spi_shutdown() {
     return SPI_OK;
 }
 
-/*
-    uint8_t pins[0]; \
-    ftdi_read_pins(__ftdi, (unsigned char*) pins); \
-    if (pins[0] != __ftdi_pins[0]) { \
-        printf("FTDI: Read of pins after %s set returned 0x%X but we expected 0x%X\n", "PIN_" #__name__, pins[0], __ftdi_pins[0]); \
-    } \
-    __ftdi_pins[0] = pins[0]; \
-
-    uint8_t pins[0]; \
-    ftdi_read_pins(__ftdi, (unsigned char*) pins); \
-    if (pins[0] != __ftdi_pins[0]) { \
-        printf("FTDI: Read of pins after %s clear returned 0x%X but we expected 0x%X\n", "PIN_" #__name__, pins[0], __ftdi_pins[0]); \
-    } \
-    __ftdi_pins[0] = pins[0]; \
-
-    printf("FTDI: Setting %s with 0x%X\n", "PIN_"#__name__,__ftdi_pins[0]); \
-    printf("FTDI: Done Setting %s with 0x%X hr=0x%X\n", "PIN_"#__name__,__ftdi_pins[0],hr); \
-
-    printf("FTDI: Clearing %s with 0x%X\n", "PIN_"#__name__,__ftdi_pins[0]); \
-    printf("FTDI: Done Clearing %s with 0x%X hr=0x%X\n", "PIN_"#__name__,__ftdi_pins[0],hr); \
-
-
-*/
-
-
-#define DEFFUNC_FTDI_SET_PIN(__name__)      \
-    int __name__##_SET() {      \
-    SET_PIN(PIN_##__name__); \
-    int hr = ftdi_write_data(__ftdi, (unsigned char*) __ftdi_pins, 1); \
-    if (hr < 0) { \
-        printf("FTDI: Failed to set pin 0x%X [0x%X] err=[0x%X]\n", PIN_##__name__,__ftdi_pins[0], hr); \
-        return SPI_ERROR; \
-    } \
-    return SPI_OK; } 
-
-#define DEFFUNC_FTDI_CLEAR_PIN(__name__) \
-    int __name__##_CLEAR() { \
-    CLEAR_PIN(PIN_##__name__); \
-    int hr = ftdi_write_data(__ftdi, (unsigned char*) __ftdi_pins, 1); \
-    if (hr < 0) { \
-        printf("FTDI: Failed to clear pin 0x%X [0x%X] err=[0x%X]\n", PIN_##__name__,__ftdi_pins[0],hr); \
-        return SPI_ERROR; \
-    } \
-    return SPI_OK; } 
-
-DEFFUNC_FTDI_SET_PIN(SCLK)
-DEFFUNC_FTDI_SET_PIN(SSEL)
-DEFFUNC_FTDI_SET_PIN(MOSI)
-DEFFUNC_FTDI_CLEAR_PIN(SCLK)
-DEFFUNC_FTDI_CLEAR_PIN(SSEL)
-DEFFUNC_FTDI_CLEAR_PIN(MOSI)
-
 static int ftdi_spi_begin_trans() {
-    SCLK_CLEAR();
-    SSEL_CLEAR();
+    uint8_t buf[255];
+    int cmdpos = 0;
+    int retval = 0;
+    buf[cmdpos++] = SET_BITS_LOW;
+    buf[cmdpos++] = __pinInitialState & ~PIN_SSEL;
+    buf[cmdpos++] = __pinDirection;
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    retval = ftdi_write_data(__ftdi, buf, cmdpos);
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    FTDI_HANDLE_ERROR_FATAL(retval, "BEGIN TRANS",SPI_ERROR);
+    if (retval != cmdpos) {
+        printf("FTDI: END_TRANS should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        return SPI_ERROR;
+    }
     return SPI_OK;
 }
 
 static int ftdi_spi_end_trans() {
-    SSEL_SET();
-    SCLK_CLEAR();
+    uint8_t buf[255];
+    int cmdpos = 0;
+    buf[cmdpos++] = SET_BITS_LOW;
+    buf[cmdpos++] = __pinInitialState | PIN_SSEL;
+    buf[cmdpos++] = __pinDirection;
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    int retval = ftdi_write_data(__ftdi, buf, cmdpos);
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    FTDI_HANDLE_ERROR_FATAL(retval, "END TRANS",SPI_ERROR);
+    if (retval != cmdpos) {
+        printf("FTDI: END_TRANS should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        return SPI_ERROR;
+    }
     return SPI_OK;
 }
 
 static int ftdi_spi_write(uint8_t *txbuf, uint16_t txsize) {
-    SCLK_CLEAR();
-    SSEL_CLEAR();
-    uint16_t txcompleted = 0;
-    while(txcompleted < txsize) {
-        uint8_t buf = txbuf[txcompleted++];
-        for(int x=0; x<8; x++) {
-            MOSI_CLEAR();
-            SCLK_CLEAR();
-            if (buf & (1<<x)) {
-                MOSI_SET();
-            }
-            SCLK_SET();
+
+    uint16_t bufferSize = txsize+3;
+    uint8_t *buf = (uint8_t*) malloc(bufferSize);
+    if (buf) {
+
+        int cmdpos = 0;
+        memset(buf, 0, bufferSize);
+        buf[cmdpos++] = MPSSE_DO_WRITE | MPSSE_WRITE_NEG;
+        buf[cmdpos++] = (txsize-1)&0xFF;    //  length low byte, 0x0000 ==> 1 byte
+        buf[cmdpos++] = (txsize-1)>>8;      // length high byte
+        int dpos = 0;
+        while(dpos < txsize)
+            buf[cmdpos++] = txbuf[dpos++];
+        ftdi_usb_purge_tx_buffer(__ftdi);
+        int retval = ftdi_write_data(__ftdi, buf, cmdpos);
+        FTDI_HANDLE_ERROR_FATAL(retval, "SPI_WRITE:WRITE_DATA",0);
+        if (retval != cmdpos) {
+            printf("FTDI: SPI_WRITE:WRITE_DATA should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+            return 0;
         }
+        ftdi_usb_purge_tx_buffer(__ftdi);
+        free(buf);
+        buf = NULL;
+        return txsize;
     }
-    SSEL_SET();
-    SCLK_CLEAR();
-    return txcompleted;
+    return 0;
 }
 
 static int ftdi_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
-    SCLK_CLEAR();
-    SSEL_CLEAR();
-    uint16_t rxcompleted = 0;
-    while(rxcompleted < rxsize) {
-        uint8_t buf = 0;
-        for(int x=0; x<8; x++) {
-            uint8_t pins[0];
-            SCLK_CLEAR();
-            SCLK_SET();
-            ftdi_read_pins(__ftdi, pins);
-            if (pins[0] & PIN_MISO) {
-                buf = buf | (1 << x);
-            }
-        }
-        rxbuf[rxcompleted++] = buf;
+
+    uint8_t buf[3];
+
+    int cmdpos = 0;
+    // commands to write and read one byte in SPI0 (polarity = phase = 0) mode
+    buf[cmdpos++] = MPSSE_DO_READ | MPSSE_READ_NEG;
+    buf[cmdpos++] = (rxsize-1)&0xFF;    //  length low byte, 0x0000 ==> 1 byte
+    buf[cmdpos++] = (rxsize-1)>>8;      // length high byte
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    int retval = ftdi_write_data(__ftdi, buf, cmdpos);
+    FTDI_HANDLE_ERROR_FATAL(retval, "SPI_READ:WRITE_DATA",0);
+    if (retval != cmdpos) {
+        printf("FTDI: SPI_READ:WRITE_DATA should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        return 0;
     }
-    SCLK_CLEAR();
-    SSEL_SET();
-    return rxcompleted;
+
+    ftdi_usb_purge_tx_buffer(__ftdi);
+    retval = ftdi_read_data(__ftdi, rxbuf, rxsize);
+    FTDI_HANDLE_ERROR_FATAL(retval,"SPI_READ:READ_DATA",0)
+    if (retval != rxsize) {
+            printf("FTDI: SPI_READ:READ_DATA should have read %d bytes, but only read %d instead.\n",cmdpos,retval);
+            return 0;
+    }
+    return rxsize;
 }
 
 tsspilib_device_vtbl_t* ftdi_spi_driver_load() {

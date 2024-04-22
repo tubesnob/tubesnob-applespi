@@ -16,9 +16,9 @@ int main(int argc, char** argv)
         int counter2;
 
         uint8_t hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
-        uint8_t ipaddr[]   = { 192, 168, 100, 133 };
+        uint8_t ipaddr[]   = { 10, 0, 0, 133 };
         uint8_t mask[]     = { 255, 255, 255, 0 };
-        uint8_t gwaddr[]   = { 192, 168, 100, 254};
+        uint8_t gwaddr[]   = { 10, 0, 0, 1};
 
         counter = 0;
         tslog_init();
@@ -71,10 +71,10 @@ int main(int argc, char** argv)
         waitMilliseconds(1000);
 
         // connect to www.google.com
-        socket->dest_ip.a0 = 172;
-        socket->dest_ip.a1 = 217;
-        socket->dest_ip.a2 = 3;
-        socket->dest_ip.a3 = 196;
+        socket->dest_ip.a0 = 104;
+        socket->dest_ip.a1 = 26;
+        socket->dest_ip.a2 = 8;
+        socket->dest_ip.a3 = 177;
         socket->dest_port = 80;
 
         _tslog->info("Connecting\n");
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         uint8_t *sendBuffer = (uint8_t*) malloc(tempSize);
         uint8_t *receiveBuffer = (uint8_t*) malloc(tempSize);
 
-        sprintf((char*)sendBuffer,"GET /?a=1&b=2 HTTP/1.1\nHost: www.google.com\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
+        sprintf((char*)sendBuffer,"GET / HTTP/1.1\nHost: www.blabbermouth.net\nUser-Agent: AppleIIgsSPI\nAccept: text/html\nAccept-Language: en-us,en;\n\n\n");
 
         _tslog->info("sending...\n");
         socket->send(socket, sendBuffer, strlen((const char*)sendBuffer));

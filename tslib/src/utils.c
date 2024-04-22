@@ -1,6 +1,10 @@
 #include "tslib.h"
 #include "../../orcadefaults.h"
 
+#ifdef __MACOS__
+#include <unistd.h>
+#endif
+
 #define __debug_log_buffer_size 0x100
 static time_t __debug_log_time_val;
 static clock_t __debug_log_clock_val;
@@ -26,18 +30,29 @@ void tslib_shutdown() {
 
 void waitMilliseconds(uint32_t ms)
 {
-   uint32_t ticksNeeded = ms / 16.666f;
-   clock_t start = clock();
-   clock_t end = clock();
-   do {
-      end = clock();
-   }
-   while (end-start < ticksNeeded);
+    #ifdef __MACOS__
+    while(ms--) usleep(1000);
+    #endif
+
+    #ifdef __APPLE2GS__
+    uint32_t ticksNeeded = ms / 16.666f;
+    clock_t start = clock();
+    clock_t end = clock();
+    do {
+        end = clock();
+    }
+    while (end-start < ticksNeeded);
+    #endif
 }
 
 void waitSeconds(uint32_t seconds)
 {
-   waitMilliseconds(seconds*1000);
+    #ifdef __MACOS__
+    sleep(seconds);    
+    #endif
+    #ifdef __APPLE2GS__
+    waitMilliseconds(seconds*1000);
+    #endif
 }
 
 static inline void update_debug_time() {
