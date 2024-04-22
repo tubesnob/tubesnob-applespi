@@ -2,6 +2,14 @@
 
 #include "tssocketlib_test.h"
 
+#ifdef __MACOS__
+#include "../../tsspilib_driver_ftdi/src/tsspilib_ftdi.h"
+#endif
+
+#ifdef __APPLE2GS__
+#include "../../tsspilib_driver_a2gpio/src/tsspilib_a2gpio.h"
+#endif
+
 int main(int argc, char** argv)
 {
         int counter;
@@ -13,20 +21,37 @@ int main(int argc, char** argv)
         uint8_t gwaddr[]   = { 192, 168, 100, 254};
 
         counter = 0;
+        tslog_init();
         
         _tslog->info("Initializing SPI\n");
-        spi_init();
+        tsspilib_device_vtbl_t* spi_device = NULL;
+    
+        #ifdef __APPLE2GS__
+        spi_device = a2gpio_spi_driver_load();
+        #else
+        spi_device = ftdi_spi_driver_load();
+        #endif
+    
+        if (spi_device==NULL) {
+            printf("No device loaded\n");
+            return SPI_ERROR;
+        }
+        spi_init(spi_device);
 
+    
         _tslog->info("Initializing W5500\n");
         w5500_init();
 
         _tslog->info("Resetting W5500\n");
         w5500_reset();
 
-        waitMilliseconds(1000);
+        //waitMilliseconds(1000);
 
-        _tslog->info("Setting MAC\n");
+//while (1) {
+
+//        _tslog->info("Setting MAC\n");
         w5500_set_SRCMAC(hwaddr);
+//}
 
         _tslog->info("Setting Source IP\n");
         w5500_set_SRCIP(ipaddr);
@@ -36,7 +61,8 @@ int main(int argc, char** argv)
 
         _tslog->info("Setting Gateway Address\n");
         w5500_set_GWADDR(gwaddr);
-
+    
+        w5500_dump_state();
         uint8_t rbuf[] = { 0,0,0,0,0,0 };
      
         _tslog->info("Creating Socket\n");
@@ -140,6 +166,8 @@ int main(int argc, char** argv)
 
 
         }
+
+    
         waitSeconds(60);
 
 }

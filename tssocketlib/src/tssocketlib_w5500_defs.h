@@ -91,7 +91,7 @@ typedef struct {
 } w5500_bsb_t;
 
 
-#define FT_W5500_GET_COMMON_8(__name__)             \
+#define FT_W5500_GET_COMMON_8(__name__)     \
         int w5500_get_##__name__(BYTE* data) { \
                 w5500_read_byte(W5500_ADDR_COMMON_##__name__, _bsb.common_register, data); \
                 return W5500_OK; \

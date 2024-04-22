@@ -2,6 +2,12 @@ LIBFILENAME=tssocketlib.o
 SRC=tssocketlib_main.c tssocketlib_w5500.c
 OBJ=$(SRC:.c=.o)
 
+ifeq ($(DOIIX), true)
+LINKDEPS=../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_a2gpio/src/tsspilib_a2gpio.o
+else
+LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_ftdi/src/tsspilib_ftdi.o
+endif 
+
 include ../../Makefile.env.include
 
 all: clean $(LIBFILENAME)

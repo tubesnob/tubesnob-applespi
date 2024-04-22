@@ -1,7 +1,13 @@
 TARGETFILENAME=tssocketlib_test_main
 SRC=tssocketlib_test_main.c
 OBJ=$(SRC:.c=.o)
-LINKDEPS=../../tslib/src/tslib.o ../../tssocketlib/src/tssocketlib.o ../../tsspilib/src/tsspilib.o
+
+
+ifeq ($(DOIIX), true)
+LINKDEPS=../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_a2gpio/src/tsspilib_a2gpio.o ../../tssocketlib/src/tssocketlib.o
+else
+LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_ftdi/src/tsspilib_ftdi.o ../../tssocketlib/src/tssocketlib.o
+endif 
 
 include ../../Makefile.env.include
 

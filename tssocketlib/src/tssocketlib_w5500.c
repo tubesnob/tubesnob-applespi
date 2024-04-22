@@ -26,7 +26,9 @@ int w5500_init() {
       _bsb.sockets[socketNumber].socket_rx_buffer = ((socketNumber << 2) | 0x03) << 3;
    }
 
+while(1) {
    w5500_reset();
+}
 
         //w5500_phycfg_t phycfg;
         //phycfg.opmode_set = 1;
