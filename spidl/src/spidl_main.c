@@ -11,6 +11,15 @@
 #include <stdarg.h>
 #include <time.h>
 
+
+#ifdef __MACOS__
+#include "../../tsspilib_driver_ftdi/src/tsspilib_driver_ftdi.h"
+#endif
+
+#ifdef __APPLE2GS__
+#include "../../tsspilib_driver_a2gpio/src/tsspilib_driver_a2gpio.h"
+#endif
+
 #define BUFFER_SIZE 0x1000
 
 static int config_handler(void* user, const char* section, const char* name, const char* value);
@@ -18,6 +27,7 @@ config_t* config_cleanup(config_t* config);
 
 int main(int argc, char** argv)
 {
+    printf("asd\n");
     tslib_init();
 
     int __rv;
@@ -98,8 +108,18 @@ int main(int argc, char** argv)
     _tslog->verbose("Destination\n   IP : %s\n   Port : %i\n",config->dest_ip, config->dest_port);
     _tslog->verbose("Transfer\n   File Name : %s\n   Save File Name : %s\n   Packet Size : %i\n",config->file_name, config->save_file_name, config->packet_size);
 
+    tsspilib_device_vtbl_t* spi_device = NULL;
+    
+    #ifdef __APPLE2GS__
+    spi_device = a2gpio_spi_driver_load();
+    _tslog->verbose("Loaded APPLE ][ GPIO SPI Driver\n");
+    #else
+    spi_device = ftdi_spi_driver_load();
+    _tslog->verbose("Loaded FTDI USB SPI Driver\n");
+    #endif
+
     _tslog->verbose("Initializing SPI ... ");
-    spi_init();
+    spi_init(spi_device);
     _tslog->verbose("OK\n");
 
     _tslog->verbose("Initializing SOCKETS ... ");

@@ -1,8 +1,13 @@
-BINDIR=bin
+BINDIR=../bin
 TARGET=spidl
 SRC=spidl_main.c
 OBJ=$(SRC:.c=.o)
-LINKDEPS=../../tslib/src/tslib.o ../../tssocketlib/src/tssocketlib.o ../../tsspilib/src/tsspilib.o
+
+ifeq ($(DOIIX), true)
+LINKDEPS=../../tssocketlib/bin/tssocketlib.o ../../tsspilib/bin/tsspilib.o ../../tslib/bin/tslib.o ../../tsspilib_driver_a2gpio/bin/tsspilib_driver_a2gpio.o 
+else
+LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o ../../tsspilib_driver_ftdi/bin/tsspilib_driver_ftdi.o ../../tssocketlib/bin/tssocketlib.o
+endif 
 
 include ../../Makefile.env.include
 
@@ -13,7 +18,7 @@ ifeq ($(DOIIX), true)
 		$(eval TRX2=$(OBJ:.o=.a))
 		$(LINK) $(LINKOPTS) $(TRX2) $(LINKDEPS) keep=$(BINDIR)/$(TARGET)
 else
-		#ignore linking phase
+		@#ignore linking phase
 endif
 
 %.o: %.c
@@ -25,7 +30,7 @@ endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) -dR $(BINDIR) $(TARGET) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) *.dSYM
+	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
 
 $(BINDIR):
 	@mkdir $(BINDIR)
