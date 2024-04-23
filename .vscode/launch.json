@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "DEBUG TSSOCKETLIB_TEST_MAIN",
+            "name": "SOCKLIB_TEST",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/tssocketlib_test/bin/tssocketlib_test_main",
@@ -15,6 +15,31 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
+          },
+          {
+            "name": "TSLIB_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/tslib_test/bin/tslib_test_main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/tslib_test/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+          },
+          {
+            "name": "TSSPILIB_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/tsspilib_test/bin/tsspilib_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/tsspilib_test/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
           }
+
     ]
 }

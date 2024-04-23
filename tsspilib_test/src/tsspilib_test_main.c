@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 {
     tsspilib_device_vtbl_t* spi_device = NULL;
     
-    tslog_vtbl_t* tslog_init();
+    __log =  tslog_init();
     __log->info("asd\n");
     
     #ifdef __APPLE2GS__
