@@ -1,3 +1,5 @@
+#pragma noroot
+
 #include <stdio.h>
 #include <stdlib.h>
 

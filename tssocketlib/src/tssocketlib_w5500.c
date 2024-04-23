@@ -1,10 +1,10 @@
+#pragma noroot
+
 #include "tssocketlib_w5500.h"
 #include "tssocketlib_w5500_defs.h"
 #include "../../tslib/src/tslib.h"
 #include "../../tsspilib/src/tsspilib.h"
-
 #include "../../orcadefaults.h"
-#pragma noroot
 
 w5500_bsb_t _bsb;
 

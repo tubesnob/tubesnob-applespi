@@ -1,42 +1,40 @@
-OUTDIR=bin
-TARGETFILENAME=tssocketlib_test_main
+BINDIR=../bin
+TARGET=tssocketlib_test_main
 SRC=tssocketlib_test_main.c
 OBJ=$(SRC:.c=.o)
 
 ifeq ($(DOIIX), true)
-LINKDEPS=../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_a2gpio/src/tsspilib_a2gpio.o ../../tssocketlib/src/tssocketlib.o
+LINKDEPS=../../tssocketlib/bin/tssocketlib.o ../../tsspilib/bin/tsspilib.o ../../tslib/bin/tslib.o ../../tsspilib_driver_a2gpio/bin/tsspilib_driver_a2gpio.o 
 else
-LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/src/tslib.o ../../tsspilib/src/tsspilib.o ../../tsspilib_driver_ftdi/src/tsspilib_ftdi.o ../../tssocketlib/src/tssocketlib.o
+LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o ../../tsspilib_driver_ftdi/bin/tsspilib_driver_ftdi.o ../../tssocketlib/bin/tssocketlib.o
 endif 
 
 include ../../Makefile.env.include
 
-all: clean $(TARGETFILENAME)
-
+all: clean $(TARGET)
 	
-$(TARGETFILENAME): dirs $(OBJ)
+$(TARGET): dirs $(OBJ)
 ifeq ($(DOIIX), true)
 		$(eval TRX2=$(OBJ:.o=.a))
-		$(LINK) $(LINKOPTS) $(TRX2) $(LINKDEPS) keep=$(OUTDIR)/$(TARGETFILENAME) 
+		$(LINK) $(LINKOPTS) $(TRX2) $(LINKDEPS) keep=$(BINDIR)/$(TARGET) 
 else
-		#ignore linking phase
+		@#ignore linking phase
 endif
 
 %.o: %.c
 ifeq ($(DOIIX), true)
-	$(CC) $(CCOPTS) $<
+	$(CC) $(CCOPTS) $< 
 else
-	$(CC) $(CCOPTS) $< $(LINKDEPS) -o $(OUTDIR)/$(TARGETFILENAME)
+	$(CC) $(CCOPTS) $< $(LINKDEPS) -o $(BINDIR)/$(TARGET)
 endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) -dR $(OUTDIR) $(TARGETFILENAME) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) *.dSYM
+	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
 
-$(OUTDIR):
-	mkdir $(OUTDIR)
+$(BINDIR):
+	@mkdir $(BINDIR)
 
-dirs: $(OUTDIR) 
+dirs: $(BINDIR) 
 
-	
 

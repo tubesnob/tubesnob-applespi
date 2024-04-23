@@ -1,31 +1,37 @@
-LIBFILENAME=tslib.o
+	
+BINDIR=../bin
+TARGET=tslib.o
 SRC=getopt.c nucrc16.c tslist.c tsmem.c utils.c ini.c tsarray.c tslog.c tsstring.c
 OBJ=$(SRC:.c=.o)
 
 include ../../Makefile.env.include
 
-all: clean $(LIBFILENAME)
+all: clean $(TARGET)
 
-$(LIBFILENAME): $(OBJ)
+$(TARGET): dirs $(OBJ)
 		@echo "Linking ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
 		$(eval TRX=$(addprefix +,$(OBJ)))
 		$(eval TRX2=$(TRX:.o=.a))
-		$(MAKELIB) $(MAKELIBOPTS) $@ $(TRX2)
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(TRX2)
 else
-		$(MAKELIB) $(MAKELIBOPTS) $@ $(OBJ)
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(OBJ)
 endif
 
 %.o: %.c
-	@echo "Compiling ($@) with ($^) DOIIX=$(DOIIX)"
+	@echo "Compiling C ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-	@$(CC) $(CCOPTS) $<
+	$(CC) $(CCOPTS) $<
 else
-	@$(CC) $(CCOPTS) -c $< -o $@
+	$(CC) $(CCOPTS) -c $< -o $@
 endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) 
-	
+	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
+
+$(BINDIR):
+	@mkdir $(BINDIR)
+
+dirs: $(BINDIR) 
 

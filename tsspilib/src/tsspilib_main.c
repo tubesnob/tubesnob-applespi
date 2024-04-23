@@ -1,3 +1,5 @@
+#pragma noroot
+
 #include "tsspilib.h"
 
 static tsspilib_device_vtbl_t* _spiDevice;
@@ -17,7 +19,7 @@ int spi_shutdown() {
     return rv;
 }
 
-int  spi_begin_trans() {
+int spi_begin_trans() {
     if (!_spiDevice)
         return SPI_NODEVICE;
     return _spiDevice->tsspilib_device_begin_trans();

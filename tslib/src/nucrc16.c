@@ -1,3 +1,5 @@
+#pragma noroot
+
 /*
  * NuFX archive manipulation library
  * Copyright (C) 2000-2007 by Andy McFadden, All Rights Reserved.

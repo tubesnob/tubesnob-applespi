@@ -11,7 +11,8 @@
         "terminal.integrated.tabStopWidth": 4,
         "files.associations": {
             "A": "A",
-            "stdlib.h": "c"
+            "stdlib.h": "c",
+            "string.h": "c"
         }
     },
     "launch": {

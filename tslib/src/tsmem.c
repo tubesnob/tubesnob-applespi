@@ -1,6 +1,7 @@
+#pragma noroot
+
 #include "tslib.h"
 #include "../../orcadefaults.h"
-#pragma noroot
 
 tsmem_vtbl_t* _tsmem;
 

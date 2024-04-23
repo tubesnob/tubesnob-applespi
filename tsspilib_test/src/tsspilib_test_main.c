@@ -3,17 +3,21 @@
 #include "../../tsspilib/src/tsspilib.h"
 
 #ifdef __MACOS__
-#include "../../tsspilib_driver_ftdi/src/tsspilib_ftdi.h"
+#include "../../tsspilib_driver_ftdi/src/tsspilib_driver_ftdi.h"
 #endif
 
 #ifdef __APPLE2GS__
-#include "../../tsspilib_driver_a2gpio/src/tsspilib_a2gpio.h"
+#include "../../tsspilib_driver_a2gpio/src/tsspilib_driver_a2gpio.h"
 #endif
 
+tslog_vtbl_t* __log = NULL;
 
 int main(int argc, char** argv)
 {
     tsspilib_device_vtbl_t* spi_device = NULL;
+    
+    tslog_vtbl_t* tslog_init();
+    __log->info("asd\n");
     
     #ifdef __APPLE2GS__
     spi_device = a2gpio_spi_driver_load();

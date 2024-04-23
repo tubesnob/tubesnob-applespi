@@ -1,39 +1,35 @@
-LIBFILENAME=tsspilib.o
+BINDIR=../bin
+TARGET=tsspilib.o
 SRC=tsspilib_main.c
 OBJ=tsspilib_main.o
 
 include ../../Makefile.env.include
 
-all: clean $(LIBFILENAME)
+all: clean $(TARGET)
 
-$(LIBFILENAME): $(OBJ)
-		@echo "Linking ($@) with ($^) DOIIX=$(DOIIX)"
+$(TARGET): dirs $(OBJ)
+
 ifeq ($(DOIIX), true)
 		$(eval TRX=$(addprefix +,$(OBJ)))
 		$(eval TRX2=$(TRX:.o=.a))
-		$(MAKELIB) $(MAKELIBOPTS) $@ $(TRX2)
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(TRX2)
 else
-		$(MAKELIB) $(MAKELIBOPTS) $@ $(OBJ)
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(OBJ)
 endif
 
 %.o: %.c
 	@echo "Compiling C ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-	@$(CC) $(CCOPTS) $<
+	$(CC) $(CCOPTS) $<
 else
-	@$(CC) $(CCOPTS) -c $< -o $@
-endif
-
-%.ROOT: %.asm
-	@echo "Compiling ASM ($@) with ($^) DOIIX=$(DOIIX)"
-ifeq ($(DOIIX), true)
-	@$(CC) $(CCOPTS) $<
-else
-	@$(CC) $(CCOPTS) -c $< -o $@
+	$(CC) $(CCOPTS) -c $< -o $@
 endif
 
 clean:
 	@echo "Cleaning"
-	$(RM) $(LIBFILENAME) $(LIBFILENAME:.o=.a) $(OBJ) $(OBJ:.o=.sym) $(OBJ:.o=.a) $(OBJ:.o=.root) $(OBJ:.o=.o.a) $(OBJ:.o=.o.root) *.ROOT
-	
+	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
 
+$(BINDIR):
+	@mkdir $(BINDIR)
+
+dirs: $(BINDIR) 

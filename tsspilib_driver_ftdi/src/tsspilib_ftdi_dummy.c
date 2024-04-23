@@ -1,4 +1,6 @@
-#include "tsspilib_ftdi.h"
+#pragma noroot
+
+#include "tsspilib_driver_ftdi.h"
 #include <stdlib.h>
 
 

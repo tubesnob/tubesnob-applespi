@@ -7,6 +7,7 @@ all:
 	$(MAKE) -C tsspilib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tssocketlib/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tslib_test/SRC $@ DOIIX=$(DOIIX)
+	$(MAKE) -C tsspilib_test/SRC $@ DOIIX=$(DOIIX)
 	$(MAKE) -C tssocketlib_test/SRC $@ DOIIX=$(DOIIX)
 #	$(MAKE) -C spidl/SRC $@ DOIIX=$(DOIIX)
 #	$(MAKE) -C spiws/SRC $@ DOIIX=$(DOIIX)

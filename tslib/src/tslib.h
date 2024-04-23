@@ -7,6 +7,8 @@
 
 #include "../../orcadefaults.h"
 
+#pragma noroot
+
 #ifndef __TSLIB_DOT_H__
 #define __TSLIB_DOT_H__
 

@@ -1,6 +1,7 @@
+#pragma noroot
+
 #include "tslib.h"
 #include "../../orcadefaults.h"
-#pragma noroot
 
 tslist_vtbl_t* _tslist;
 

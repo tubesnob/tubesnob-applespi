@@ -1,3 +1,5 @@
+#pragma noroot
+
 /* Getopt for GNU.
    NOTE: getopt is now part of the C library, so if you don't know what
    "Keep this file name-space clean" means, talk to roland@gnu.ai.mit.edu
@@ -17,6 +19,8 @@
    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* NOTE!!!  AIX requires this to be the first thing in the file.
    Do not put ANYTHING before it!  */
+
+
 #if !defined (__GNUC__) && defined (_AIX)
  #pragma alloca
 #endif

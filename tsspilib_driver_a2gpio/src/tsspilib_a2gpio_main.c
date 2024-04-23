@@ -1,4 +1,4 @@
-#include "tsspilib_a2gpio.h"
+#include "tsspilib_driver_a2gpio.h"
 
 #define A2_AN0_OFF  0xc058
 #define A2_AN0_ON   0xc059

@@ -1,3 +1,5 @@
+#pragma noroot
+
 #include "tslib.h"
 #include "../../orcadefaults.h"
 
