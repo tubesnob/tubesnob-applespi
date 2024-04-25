@@ -1,7 +1,7 @@
 #include "spiws.h"
 #include "../../orcadefaults.h"
 
-#pragma noroot
+//#pragma noroot
 
 #define MAX_REQUEST_SIZE        4000
 #define REQUEST_BUFFER_SIZE     8192

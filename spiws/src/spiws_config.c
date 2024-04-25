@@ -1,7 +1,7 @@
 #include "spiws.h"
 #include "../../orcadefaults.h"
 
-#pragma noroot
+//#pragma noroot
 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
 

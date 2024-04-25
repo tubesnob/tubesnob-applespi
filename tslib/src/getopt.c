@@ -1,4 +1,4 @@
-#pragma noroot
+//#pragma noroot
 
 /* Getopt for GNU.
    NOTE: getopt is now part of the C library, so if you don't know what
@@ -566,7 +566,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
   }
 }
 int
-getopt (argc, argv, optstring)
+getopt(argc, argv, optstring)
      int argc;
      char *const *argv;
      const char *optstring;

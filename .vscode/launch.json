@@ -5,6 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "SPIDL_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/spidl/bin/spidl",
+            "args": [
+                "-i", "spidl", "-o", "spidl2"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/spidl",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "BUILD ALL"
+        },
+        {
             "name": "SOCKLIB_TEST",
             "type": "cppdbg",
             "request": "launch",

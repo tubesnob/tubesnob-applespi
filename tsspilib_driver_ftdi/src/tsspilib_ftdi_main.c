@@ -1,4 +1,4 @@
-#pragma noroot
+//#pragma noroot
 
 #include "tsspilib_driver_ftdi.h"
 
@@ -50,12 +50,12 @@ static int ftdi_spi_init() {
     }
  
     __ftdi_version = ftdi_get_library_version();
-    printf("FTDI: Initialized libftdi %s (major: %d, minor: %d, micro: %d, snapshot ver: %s)\n",__ftdi_version.version_str, __ftdi_version.major, __ftdi_version.minor, __ftdi_version.micro,__ftdi_version.snapshot_str);
+    printf("FTDI: Initialized libftdi %s (major: %i, minor: %i, micro: %i, snapshot ver: %s)\n",__ftdi_version.version_str, __ftdi_version.major, __ftdi_version.minor, __ftdi_version.micro,__ftdi_version.snapshot_str);
 
     printf("FTDI: Opening USB Device [%X:%X]\n", USB_MAJOR, USB_MINOR);
     if ((ret = ftdi_usb_open(__ftdi, USB_MAJOR, USB_MINOR)) < 0)
     {
-        printf("FTDI: unable to open ftdi device @ (%X:%X): %d (%s)\n", USB_MAJOR, USB_MINOR, ret, ftdi_get_error_string(__ftdi));
+        printf("FTDI: unable to open ftdi device @ (%X:%X): %i (%s)\n", USB_MAJOR, USB_MINOR, ret, ftdi_get_error_string(__ftdi));
         ftdi_free(__ftdi);
         return SPI_NODEVICE;
     }
@@ -136,7 +136,7 @@ static int ftdi_spi_begin_trans() {
     ftdi_usb_purge_tx_buffer(__ftdi);
     FTDI_HANDLE_ERROR_FATAL(retval, "BEGIN TRANS",SPI_ERROR);
     if (retval != cmdpos) {
-        printf("FTDI: END_TRANS should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        printf("FTDI: END_TRANS should have sent %i bytes, but only sent %i instead.\n",cmdpos,retval);
         return SPI_ERROR;
     }
     return SPI_OK;
@@ -153,7 +153,7 @@ static int ftdi_spi_end_trans() {
     ftdi_usb_purge_tx_buffer(__ftdi);
     FTDI_HANDLE_ERROR_FATAL(retval, "END TRANS",SPI_ERROR);
     if (retval != cmdpos) {
-        printf("FTDI: END_TRANS should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        printf("FTDI: END_TRANS should have sent %i bytes, but only sent %i instead.\n",cmdpos,retval);
         return SPI_ERROR;
     }
     return SPI_OK;
@@ -177,7 +177,7 @@ static int ftdi_spi_write(uint8_t *txbuf, uint16_t txsize) {
         int retval = ftdi_write_data(__ftdi, buf, cmdpos);
         FTDI_HANDLE_ERROR_FATAL(retval, "SPI_WRITE:WRITE_DATA",0);
         if (retval != cmdpos) {
-            printf("FTDI: SPI_WRITE:WRITE_DATA should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+            printf("FTDI: SPI_WRITE:WRITE_DATA should have sent %i bytes, but only sent %i instead.\n",cmdpos,retval);
             return 0;
         }
         ftdi_usb_purge_tx_buffer(__ftdi);
@@ -201,7 +201,7 @@ static int ftdi_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
     int retval = ftdi_write_data(__ftdi, buf, cmdpos);
     FTDI_HANDLE_ERROR_FATAL(retval, "SPI_READ:WRITE_DATA",0);
     if (retval != cmdpos) {
-        printf("FTDI: SPI_READ:WRITE_DATA should have sent %d bytes, but only sent %d instead.\n",cmdpos,retval);
+        printf("FTDI: SPI_READ:WRITE_DATA should have sent %i bytes, but only sent %i instead.\n",cmdpos,retval);
         return 0;
     }
 
@@ -209,7 +209,7 @@ static int ftdi_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
     retval = ftdi_read_data(__ftdi, rxbuf, rxsize);
     FTDI_HANDLE_ERROR_FATAL(retval,"SPI_READ:READ_DATA",0)
     if (retval != rxsize) {
-            printf("FTDI: SPI_READ:READ_DATA should have read %d bytes, but only read %d instead.\n",cmdpos,retval);
+            printf("FTDI: SPI_READ:READ_DATA should have read %i bytes, but only read %i instead.\n",cmdpos,retval);
             return 0;
     }
     return rxsize;

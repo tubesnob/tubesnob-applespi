@@ -11,9 +11,9 @@
 #include <stdarg.h>
 #include <time.h>
 
-
 #ifdef __MACOS__
 #include "../../tsspilib_driver_ftdi/src/tsspilib_driver_ftdi.h"
+#include <unistd.h>
 #endif
 
 #ifdef __APPLE2GS__
@@ -22,69 +22,42 @@
 
 #define BUFFER_SIZE 0x1000
 
-static int config_handler(void* user, const char* section, const char* name, const char* value);
-config_t* config_cleanup(config_t* config);
-
 int main(int argc, char** argv)
 {
-    printf("asd\n");
-    tslib_init();
+    /* 
+        SPIDL Options
+        -c filename : Use config file name [filename]
+        -i filename : Receive file name [filename] from host
+        -o filename : Save file as local [filename]
+        -d          : Output file to stdout
+        -s          : Silent Mode
+        -v          : Verbose Mode
+    */
 
     int __rv;
+
+    // small buffer for our send commands and receive buffer
+    char *__sendCommand = (char*) malloc(400);
+    unsigned char* __receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
+
+    tslib_init();
+
     _tslog->logMask = TSLOG_LEVEL_INFO | TSLOG_LEVEL_ERROR;
 
-    char* configFileToLoad = NULL;
     config_t *config = (config_t*) malloc(sizeof(config_t));
-    config->outputFileToSTDOUT = 0;
+    memset(config,0,sizeof(config_t));
 
-    int c = 0;
-    while (1)
-    {
-        int this_option_optind = optind ? optind : 1;
-        c = getopt (argc, argv, "dc:b:vi:o:s");
-        if (c == EOF)
-            break;
-        switch (c)
-        {
-            case 'd':
-                // output file to stdout
-                config->outputFileToSTDOUT = 1;
-                break;
-            case 'c':
-                // config file
-                configFileToLoad = strdup(optarg);
-                break;
-            case 'b':
-                // block size
-                config->packet_size = atoi(optarg);
-                break;
-            case 'v':
-                // verbose
-                _tslog->logMask |= TSLOG_LEVEL_VERBOSE;
-                break;
-            case 'i':
-                // file name to read
-                config->file_name = strdup(optarg);
-                break;
-            case 'o':
-                // file name to save
-                config->save_file_name = strdup(optarg);
-                break;
-            case 's':
-                // silent mode
-                _tslog->logMask = TSLOG_LEVEL_NONE;
-                break;
-        }
-    }
+    parse_command_line(argc, argv, config);
 
-    if (!configFileToLoad)
-        configFileToLoad = strdup("spidl.cfg");
+    if (!config->config_file_name)
+        config->config_file_name = strdup("spidl.cfg");
 
-    if (ini_parse(configFileToLoad, config_handler, config) < 0) {
-            _tslog->error("Couldn't find configuration file @ [%s]. Exiting\n",configFileToLoad);
+    if (config_load(config->config_file_name, config) < 0) {
+            _tslog->error("Couldn't find configuration file @ [%s]. Exiting\n",config->config_file_name);
             __rv = 1;
             goto exit;
     }
+    
 
     if (!config->file_name) {
             _tslog->error("No download file name specified\n");
@@ -112,11 +85,15 @@ int main(int argc, char** argv)
     
     #ifdef __APPLE2GS__
     spi_device = a2gpio_spi_driver_load();
-    _tslog->verbose("Loaded APPLE ][ GPIO SPI Driver\n");
+    _tslog->info("Loaded APPLE ][ GPIO SPI Driver\n");
     #else
     spi_device = ftdi_spi_driver_load();
-    _tslog->verbose("Loaded FTDI USB SPI Driver\n");
+    _tslog->info("Loaded FTDI USB SPI Driver\n");
     #endif
+
+    _tslog->verbose("Initializing SPI ... ");
+    spi_init(spi_device);
+    _tslog->verbose("OK\n");
 
     _tslog->verbose("Initializing SPI ... ");
     spi_init(spi_device);
@@ -133,7 +110,6 @@ int main(int argc, char** argv)
     _tslog->verbose("Resetting W5500 ... ");
     w5500_reset();
     _tslog->verbose("OK\n");
-
 
     _tslog->info("Initializing Network Adapter ... ");
     address_t* source_hwaddr = (address_t*) malloc(sizeof(address_t));
@@ -167,24 +143,22 @@ int main(int argc, char** argv)
     }
     _tslog->info(" Connected!\n");
 
-    // small buffer for our send commands and receive buffer
-    char *sendCommand = (char*) malloc(400);
-    unsigned char* receiveBuffer = (unsigned char*) malloc(BUFFER_SIZE);
-
     // send the command to the destination
     _tslog->info("Requesting file [%s]\n", config->file_name);
-    sprintf(sendCommand,"SENDFILE\n%s\n%i\n",config->file_name,config->packet_size);
-    socket->send(socket, (unsigned char *)sendCommand, strlen((const char*)sendCommand));
+    sprintf(__sendCommand,"SENDFILE\n%s\n%i\n",config->file_name,config->packet_size);
+    socket->send(socket, (unsigned char *)__sendCommand, strlen((const char*)__sendCommand));
 
     uint16_t packetHeaderSize = sizeof(data_packet_t);
     uint16_t fixedReceiveBlockSize = packetHeaderSize + config->packet_size;
 
     // receive a block of data...
     _tslog->info("Waiting for header packet\n");
-    socket->receive(socket, receiveBuffer, fixedReceiveBlockSize);
-    uint16_t* headeruint8_ts = (uint16_t*) receiveBuffer;
-    data_packet_t* packet = (data_packet_t*) receiveBuffer;
-    unsigned char* packetData = &receiveBuffer[packetHeaderSize];
+    socket->receive(socket, __receiveBuffer, fixedReceiveBlockSize);
+    w5500_dump_state();
+
+    uint16_t* headeruint8_ts = (uint16_t*) __receiveBuffer;
+    data_packet_t* packet = (data_packet_t*) __receiveBuffer;
+    unsigned char* packetData = &__receiveBuffer[packetHeaderSize];
 
     if (packet->packetNumber !=0) {
             _tslog->error("Invalid packet header\nExiting\n");
@@ -210,13 +184,13 @@ int main(int argc, char** argv)
     uint16_t workPacketNumber = 1;
     while(workPacketNumber <= packet->totalNumberOfPackets) {
 
-            sprintf(sendCommand,"sendpacket\n%i\n",workPacketNumber);
+            sprintf(__sendCommand,"sendpacket\n%i\n",workPacketNumber);
 
             _tslog->info("[%i/%i] : S", workPacketNumber, (unsigned int) packet->totalNumberOfPackets);
-            socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
+            socket->send(socket, (unsigned char*) __sendCommand, strlen((const char*)__sendCommand));
 
             _tslog->info("R");
-            socket->receive(socket,receiveBuffer,fixedReceiveBlockSize);
+            socket->receive(socket,__receiveBuffer,fixedReceiveBlockSize);
 
             _tslog->info("C");
             uint16_t ourCRC16 = Nu_CalcCRC16((unsigned short) workPacketNumber, packetData, packet->packetDataLength);
@@ -242,8 +216,8 @@ int main(int argc, char** argv)
     _tslog->info("File Saved\n");
 
     _tslog->info("Ending Session w/ Host\n");
-    sprintf(sendCommand,"quit\n");
-    socket->send(socket, (unsigned char*) sendCommand, strlen((const char*)sendCommand));
+    sprintf(__sendCommand,"quit\n");
+    socket->send(socket, (unsigned char*) __sendCommand, strlen((const char*)__sendCommand));
 
     _tslog->info("Closing Connection\n");
     socket->close(socket);
@@ -261,8 +235,8 @@ int main(int argc, char** argv)
     _tslog->info("Cleaning Up ... ");
 
     config = config_cleanup(config);
-    freeandnull(receiveBuffer);
-    freeandnull(sendCommand);
+    freeandnull(__receiveBuffer);
+    freeandnull(__sendCommand);
     _tslog->info("Done!\n");
 
     tslib_shutdown();
@@ -271,52 +245,7 @@ int main(int argc, char** argv)
 
 }
 
-config_t* config_cleanup(config_t* config) 
-{
-        if (config) {
-                freeandnull(config->dest_ip);
-                freeandnull(config->file_name);
-                freeandnull(config->save_file_name);
-                freeandnull(config->source_gwaddr);
-                freeandnull(config->source_ipaddr);
-                freeandnull(config->source_macaddr);
-                freeandnull(config->source_mask);
-                freeandnull(config);
-        }
-        return NULL;
-}
 
-#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-static int config_handler(void* user, const char* section, const char* name, const char* value)
-{
-    config_t* pconfig = (config_t*) user;
-
-    if (MATCH("source", "ip"))
-        pconfig->source_ipaddr = strdup(value);
-
-    if (MATCH("source", "mac"))
-        pconfig->source_macaddr = strdup(value);
-
-    if (MATCH("source", "gw"))
-        pconfig->source_gwaddr = strdup(value);
-
-    if (MATCH("source", "mask"))
-        pconfig->source_mask = strdup(value);
-
-    if (MATCH("source", "port"))
-        pconfig->source_port = atoi(value);
-
-    if (MATCH("dest", "ip"))
-        pconfig->dest_ip = strdup(value);
-
-    if (MATCH("dest", "port"))
-        pconfig->dest_port = atoi(value);
-
-    if (MATCH("transfer", "packetSize"))
-        pconfig->packet_size = atoi(value);
-
-    return 1;
-}
 
 
 

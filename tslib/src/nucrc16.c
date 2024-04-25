@@ -1,4 +1,4 @@
-#pragma noroot
+//#pragma noroot
 
 /*
  * NuFX archive manipulation library

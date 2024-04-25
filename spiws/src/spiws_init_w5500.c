@@ -1,7 +1,7 @@
 #include "spiws.h"
 #include "../../orcadefaults.h"
 
-#pragma noroot
+//#pragma noroot
 
 static tslog_vtbl_t* _log;
 

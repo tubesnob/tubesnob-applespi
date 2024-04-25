@@ -30,7 +30,7 @@ namespace spidlhost
                 int     packetSize;
 
                 using (BinaryWriter writer = new BinaryWriter(sstream, System.Text.Encoding.ASCII)) {
-
+                    
                     using (StreamReader sr = new StreamReader(sstream, System.Text.Encoding.ASCII))
                     {
                         command = sr.ReadLine();
@@ -39,7 +39,7 @@ namespace spidlhost
 
                         Console.WriteLine($"Command = [{command}] FileName = [{commandArgument}] PacketSize = [{packetSize}]");
 
-                        string filePath = $"/users/smentzer/{commandArgument}";
+                        string filePath = $"/users/smentzer/source/tubesnob-applespi/spidl/bin/{commandArgument}";
                         if (!File.Exists(filePath))
                         {
                             Console.WriteLine($"File {filePath} doesn't exist");

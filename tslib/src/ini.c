@@ -1,4 +1,4 @@
-#pragma noroot
+//#pragma noroot
 
 /* inih -- simple .INI file parser
 

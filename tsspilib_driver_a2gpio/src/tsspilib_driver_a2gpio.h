@@ -1,4 +1,5 @@
 #include "../../orcadefaults.h"
+#include "../../tslib/src/tslib.h"
 #include "../../tsspilib/src/tsspilib.h"
 
 #ifndef __TSSPILIB_A2GPIO_DOT_H__

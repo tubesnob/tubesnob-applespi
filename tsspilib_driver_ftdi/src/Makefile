@@ -2,8 +2,6 @@ BINDIR=../bin
 TARGET=tsspilib_driver_ftdi.o
 
 ifeq ($(DOIIX), true)
-SRC=tsspilib_ftdi_dummy.c
-OBJ=tsspilib_ftdi_dummy.o
 else
 LINKDEPS=/usr/local/lib/libftdi1.dylib 
 SRC=tsspilib_ftdi_main.c

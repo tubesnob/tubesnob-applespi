@@ -1,13 +1,15 @@
-#pragma noroot
+//#pragma noroot
+#include <stdio.h>
 
 #include "tsspilib.h"
 
-static tsspilib_device_vtbl_t* _spiDevice;
+static tsspilib_device_vtbl_t* _spiDevice = NULL;
 
 int spi_init(tsspilib_device_vtbl_t* spidev) {
     spi_shutdown();
     _spiDevice = spidev;
-    return _spiDevice->tsspilib_device_init();
+    int rv = _spiDevice->tsspilib_device_init();
+    return rv;
 }
 
 int spi_shutdown() {

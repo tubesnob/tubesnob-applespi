@@ -1,4 +1,4 @@
-#pragma noroot
+//#pragma noroot
 
 #include "tssocketlib_w5500.h"
 #include "tssocketlib_w5500_defs.h"
@@ -28,10 +28,10 @@ int w5500_init() {
 
    w5500_reset();
 
-        //w5500_phycfg_t phycfg;
-        //phycfg.opmode_set = 1;
-        //phycfg.opmode = W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO;
-        //w5500_set_PHYCFG(phycfg);
+   //w5500_phycfg_t phycfg;
+   //phycfg.opmode_set = 1;
+   //phycfg.opmode = W5500_PHYCFG_OPMODE_100BT_HALF_AUTO;
+   //w5500_set_PHYCFG(phycfg);
 
    for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
         w5500_set_socket_INTERRUPT(socketNumber, 0xFF);         // reset the interrupt register
@@ -207,19 +207,19 @@ int w5500_dump_state() {
         _tslog->info("###### W5500 STATUS DUMP ######\n");
         
         w5500_get_VERSIONR(rbuf);
-        _tslog->info("W5500 Version = %d\n", rbuf[0]);
+        _tslog->info("W5500 Version = %i\n", rbuf[0]);
 
         w5500_get_SRCMAC(rbuf);
         _tslog->info("MAC Address = %x:%x:%x:%x:%x:%x\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3], rbuf[4], rbuf[5]);
 
         w5500_get_SRCIP(rbuf);
-        _tslog->info("IP Address = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("IP Address = %i.%i.%i.%i\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_get_SUBMASK(rbuf);
-        _tslog->info("Subnet Mask = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("Subnet Mask = %i.%i.%i.%i\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_get_GWADDR(rbuf);
-        _tslog->info("Gateway = %d.%d.%d.%d\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
+        _tslog->info("Gateway = %i.%i.%i.%i\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
         w5500_phycfg_t phyConfig;
         w5500_get_PHYCFG(&phyConfig);
@@ -264,7 +264,7 @@ int w5500_dump_state() {
 
 
         for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
-                _tslog->info("[S%d]: ", socketNumber);
+                _tslog->info("[S%i]: ", socketNumber);
                 w5500_get_socket_STATUS(socketNumber, rbuf);
                 switch(rbuf[0]) {
                         case W5500_SOCKET_STATUS_CLOSED: _tslog->info("W5500_SOCKET_STATUS_CLOSED\n"); break;

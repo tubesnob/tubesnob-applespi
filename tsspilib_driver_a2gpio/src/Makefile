@@ -4,10 +4,9 @@ TARGET=tsspilib_driver_a2gpio.o
 ifeq ($(DOIIX), true)
 SRC=tsspilib_a2gpio_main.c tsspilib_a2gpio_spireadb.asm tsspilib_a2gpio_spisendb.asm
 OBJ=tsspilib_a2gpio_spireadb.ROOT tsspilib_a2gpio_spisendb.ROOT tsspilib_a2gpio_main.o 
-else
-SRC=tsspilib_a2gpio_dummy.c
-OBJ=tsspilib_a2gpio_dummy.o
 endif 
+
+LINKDEPS=../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o 
 
 include ../../Makefile.env.include
 

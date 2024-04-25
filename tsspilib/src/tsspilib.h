@@ -16,11 +16,11 @@ typedef struct tsspilib_device_vtbl {
    int     (*tsspilib_device_read)(uint8_t* rxbuf, uint16_t rzsize);
 } tsspilib_device_vtbl_t;
 
-extern int spi_init(tsspilib_device_vtbl_t* spidev);
-extern int spi_shutdown();
-extern int spi_begin_trans();
-extern int spi_end_trans();
-extern int spi_write(uint8_t* txbuf, uint16_t txsize);
-extern int spi_read(uint8_t* rxbuf, uint16_t rxsize);
+int spi_init(tsspilib_device_vtbl_t* spidev);
+int spi_shutdown();
+int spi_begin_trans();
+int spi_end_trans();
+int spi_write(uint8_t* txbuf, uint16_t txsize);
+int spi_read(uint8_t* rxbuf, uint16_t rxsize);
 
 #endif

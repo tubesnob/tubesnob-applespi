@@ -1,6 +1,6 @@
 BINDIR=../bin
 TARGET=spidl
-SRC=spidl_main.c
+SRC=spidl_main.c spidl_cmdline.c spidl_config.c
 OBJ=$(SRC:.c=.o)
 
 ifeq ($(DOIIX), true)
@@ -18,14 +18,15 @@ ifeq ($(DOIIX), true)
 		$(eval TRX2=$(OBJ:.o=.a))
 		$(LINK) $(LINKOPTS) $(TRX2) $(LINKDEPS) keep=$(BINDIR)/$(TARGET)
 else
-		@#ignore linking phase
+		@echo LINKING
+		$(CC) $(LINKOPTS) $(OBJ) $(LINKDEPS) -o $(BINDIR)/$(TARGET)
 endif
 
 %.o: %.c
 ifeq ($(DOIIX), true)
 	$(CC) $(CCOPTS) $<
 else
-	$(CC) $(CCOPTS) $< $(LINKDEPS) -o $(BINDIR)/$(TARGET)
+	$(CC) $(CCOPTS) -c $< $(LINKDEPS) 
 endif
 
 clean:

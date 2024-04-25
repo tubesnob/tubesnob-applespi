@@ -1,3 +1,6 @@
+#include "../../orcadefaults.h"
+#include "../../tslib/src/tslib.h"
+#include "../../tsspilib/src/tsspilib.h"
 #include "tsspilib_driver_a2gpio.h"
 
 #define A2_AN0_OFF  0xc058
@@ -29,41 +32,61 @@ uint16_t spisendb(uint8_t *buffer, uint16_t numberOfuint8_ts);
 uint16_t spireadb(uint8_t *buffer, uint16_t numberOfuint8_ts);
 
 static int a2gpio_spi_init() {
+    return SPI_OK;
 }
 
-static int a2gpio_spi_shutdown() {
+int a2gpio_spi_shutdown() {
+    return SPI_OK;
 }
 
-static int a2gpio_spi_begin_trans() {
+int a2gpio_spi_begin_trans() {
     SCLK_OFF;
     SSEL_OFF;
+    return SPI_OK;
 }
 
-static int a2gpio_spi_end_trans() {
+
+int a2gpio_spi_end_trans() {
     SSEL_ON;
     SCLK_OFF;
+    return SPI_OK;
 }
 
-static int a2gpio_spi_write(uint8_t *txbuf, uint16_t txsize) {
+int a2gpio_spi_write(uint8_t *txbuf, uint16_t txsize) {
     return spisendb(txbuf, txsize);
 }
 
-static int a2gpio_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
+int a2gpio_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
     return spireadb(rxbuf, rxsize);
 }
 
+void dumpvals(const char *header, tsspilib_device_vtbl_t* vtbl) {
+    printf("[%s] a2gpio::vtbl[0x%X] i[0x%X] s[0x%X] b[0x%X] e[0x%X] r[0x%X] r[0x%X]\n", header,
+    (unsigned int) vtbl, 
+    (unsigned int) vtbl->tsspilib_device_init, 
+    (unsigned int) vtbl->tsspilib_device_shutdown, 
+    (unsigned int) vtbl->tsspilib_device_begin_trans, 
+    (unsigned int) vtbl->tsspilib_device_end_trans, 
+    (unsigned int) vtbl->tsspilib_device_read, 
+    (unsigned int) vtbl->tsspilib_device_write);
+}
 
 
 tsspilib_device_vtbl_t* a2gpio_spi_driver_load() {
-    tsspilib_device_vtbl_t* rv = (tsspilib_device_vtbl_t*) malloc(sizeof(tsspilib_device_vtbl_t));
+    int osize = sizeof(tsspilib_device_vtbl_t);
+    tsspilib_device_vtbl_t* rv = (tsspilib_device_vtbl_t*) malloc(osize);
+    memset(rv, 0, osize);
     rv->tsspilib_device_init = &a2gpio_spi_init;
     rv->tsspilib_device_shutdown = &a2gpio_spi_shutdown;
     rv->tsspilib_device_begin_trans = &a2gpio_spi_begin_trans;
     rv->tsspilib_device_end_trans = &a2gpio_spi_end_trans;
     rv->tsspilib_device_write = &a2gpio_spi_write;
     rv->tsspilib_device_read = &a2gpio_spi_read;
+    dumpvals("I", rv);
     return rv;
 }
+
+
 
 
 
