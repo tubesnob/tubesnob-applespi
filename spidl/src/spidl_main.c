@@ -95,10 +95,6 @@ int main(int argc, char** argv)
     spi_init(spi_device);
     _tslog->verbose("OK\n");
 
-    _tslog->verbose("Initializing SPI ... ");
-    spi_init(spi_device);
-    _tslog->verbose("OK\n");
-
     _tslog->verbose("Initializing SOCKETS ... ");
     socket_init();
     _tslog->verbose("OK\n");
