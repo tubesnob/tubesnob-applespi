@@ -29,6 +29,34 @@ void socket_init() {
       }      
 }
 
+socket_t* socket_create_raw() {
+
+    // close all the sockets since MACRAW requires socket #0 and no other sockets to be running
+    for(int sn=0; sn < W5500_MAX_SOCKETS; sn++) {
+        w5500_set_socket_COMMAND(sn, W5500_SOCKET_CMD_CLOSE);
+    }
+    int rawSocketNumber = 0;
+    socket_t* ss = (socket_t*) malloc(sizeof(socket_t));
+    ss->id = __socket_id++;
+    ss->number = 0;
+    ss->source_port = 9999;
+    ss->protocol = W5500_SOCKET_MODE_MACRAW; 
+    ss->connect = &socket_connect;
+    ss->close = &socket_close;
+    ss->disconnect = &socket_disconnect;
+    ss->listen = &socket_listen; 
+    ss->send = &socket_send;
+    ss->receive_available = &socket_receive_available;
+    ss->receive = &socket_receive;
+    ss->refresh = &socket_refresh;
+    w5500_set_socket_RX_BUFSIZE(ss->number, 0x10);
+    w5500_set_socket_TX_BUFSIZE(ss->number, 0x10);
+    w5500_set_socket_MODE(ss->number, W5500_SOCKET_MODE_MACRAW);
+    w5500_set_socket_COMMAND(ss->number, W5500_SOCKET_CMD_OPEN);
+
+    return ss;
+}
+
 socket_t* socket_create(unsigned char protocol, unsigned short source_port)
 {
 
@@ -150,7 +178,7 @@ static int socket_send(socket_t *socket, unsigned char *buf, unsigned short leng
 
             // check the socket status. if it is not established, we cannot send data
             w5500_get_socket_STATUS(socket->number, &socketStatus);
-            if (socketStatus != W5500_SOCKET_STATUS_ESTABLISHED) {
+            if (socketStatus != W5500_SOCKET_STATUS_ESTABLISHED && socket->protocol != W5500_SOCKET_MODE_MACRAW) {
                   return SOCKET_ERR_INVALIDARGUMENT;
             }
 
@@ -208,7 +236,9 @@ static int socket_receive(socket_t *socket, unsigned char *buf, unsigned short l
 
             // check the socket status. if it is not established, we cannot send data
             w5500_get_socket_STATUS(socket->number, &socketStatus);
-            if (socketStatus != W5500_SOCKET_STATUS_ESTABLISHED) {
+
+
+            if (socketStatus != W5500_SOCKET_STATUS_ESTABLISHED && socket->protocol != W5500_SOCKET_MODE_MACRAW) {
                   return SOCKET_ERR_INVALIDARGUMENT;
             }
 

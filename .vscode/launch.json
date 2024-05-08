@@ -20,6 +20,18 @@
             "preLaunchTask": "BUILD ALL"
         },
         {
+            "name": "LWIP_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/lwip_test/bin/lwip_test_main",
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/lwip_test",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "BUILD ALL"
+        },
+        {
             "name": "SOCKLIB_TEST",
             "type": "cppdbg",
             "request": "launch",

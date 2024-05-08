@@ -54,6 +54,7 @@ typedef struct socket_t {
 void socket_init();
 
 socket_t* socket_create(uint8_t protocol, uint16_t source_port);
+socket_t* socket_create_raw();
 char* iptostr(address_t ip, char* buf);
 int strtoip(const char *str, address_t* ip);
 char* mactostr(address_t mac, char *buf);

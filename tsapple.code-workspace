@@ -12,7 +12,10 @@
         "files.associations": {
             "A": "A",
             "stdlib.h": "c",
-            "string.h": "c"
+            "string.h": "c",
+            "tsspilib_driver_a2gpio.h": "c",
+            "locale": "c",
+            "string": "c"
         }
     },
     "launch": {
