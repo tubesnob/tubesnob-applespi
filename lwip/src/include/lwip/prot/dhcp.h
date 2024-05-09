@@ -77,7 +77,7 @@ struct dhcp_msg
   PACK_STRUCT_FLD_8(u8_t sname[DHCP_SNAME_LEN]);
   PACK_STRUCT_FLD_8(u8_t file[DHCP_FILE_LEN]);
   PACK_STRUCT_FIELD(u32_t cookie);
-#define DHCP_MIN_OPTIONS_LEN 68U
+#define DHCP_MIN_OPTIONS_LEN 60U
 /** make sure user does not configure this too small */
 #if ((defined(DHCP_OPTIONS_LEN)) && (DHCP_OPTIONS_LEN < DHCP_MIN_OPTIONS_LEN))
 #  undef DHCP_OPTIONS_LEN
@@ -136,11 +136,15 @@ typedef enum {
 #define DHCP_OPTION_ROUTER          3
 #define DHCP_OPTION_DNS_SERVER      6
 #define DHCP_OPTION_HOSTNAME        12
+#define DHCP_OPTION_DOMAINNAME      15
+
 #define DHCP_OPTION_IP_TTL          23
 #define DHCP_OPTION_MTU             26
 #define DHCP_OPTION_BROADCAST       28
 #define DHCP_OPTION_TCP_TTL         37
 #define DHCP_OPTION_NTP             42
+#define DHCP_OPTION_NETBIOSNS       44
+#define DHCP_OPTION_NETBIOSNT       46
 #define DHCP_OPTION_END             255
 
 /* DHCP options */

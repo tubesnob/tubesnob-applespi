@@ -383,6 +383,7 @@
  */
 #define LWIP_NETCONN                    0
 
+#define LWIP_NETIF_HOSTNAME 1
 /*
    ------------------------------------
    ---------- Socket options ----------

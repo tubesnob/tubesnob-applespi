@@ -209,7 +209,11 @@ static u8_t  dhcp_rx_options_given[DHCP_OPTION_IDX_MAX];
 static u8_t dhcp_discover_request_options[] = {
   DHCP_OPTION_SUBNET_MASK,
   DHCP_OPTION_ROUTER,
-  DHCP_OPTION_BROADCAST
+  DHCP_OPTION_BROADCAST,
+  DHCP_OPTION_NETBIOSNS,
+  121,6,15,108,114,119,252,95,
+  DHCP_OPTION_NETBIOSNT
+
 #if LWIP_DHCP_PROVIDE_DNS_SERVERS
   , DHCP_OPTION_DNS_SERVER
 #endif /* LWIP_DHCP_PROVIDE_DNS_SERVERS */
@@ -264,6 +268,7 @@ static u16_t dhcp_option_short(u16_t options_out_len, u8_t *options, u16_t value
 static u16_t dhcp_option_long(u16_t options_out_len, u8_t *options, u32_t value);
 #if LWIP_NETIF_HOSTNAME
 static u16_t dhcp_option_hostname(u16_t options_out_len, u8_t *options, struct netif *netif);
+static u16_t dhcp_option_clientid(u16_t options_out_len, u8_t *options, struct netif *netif);
 #endif /* LWIP_NETIF_HOSTNAME */
 /* always add the DHCP options trailer to end and pad */
 static void dhcp_option_trailer(u16_t options_out_len, u8_t *options, struct pbuf *p_out);
@@ -480,6 +485,7 @@ dhcp_select(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME
     options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+    options_out_len = dhcp_option_clientid(options_out_len, msg_out->options, netif);
 #endif /* LWIP_NETIF_HOSTNAME */
 
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_REQUESTING, msg_out, DHCP_REQUEST, &options_out_len);
@@ -1046,6 +1052,7 @@ dhcp_discover(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME && LWIP_DHCP_DISCOVER_ADD_HOSTNAME
     options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+    options_out_len = dhcp_option_clientid(options_out_len, msg_out->options, netif);
 #endif /* LWIP NETIF HOSTNAME && LWIP_DHCP_DISCOVER_ADD_HOSTNAME */
 
     options_out_len = dhcp_option(options_out_len, msg_out->options, DHCP_OPTION_PARAMETER_REQUEST_LIST, LWIP_ARRAYSIZE(dhcp_discover_request_options));
@@ -1181,6 +1188,7 @@ dhcp_renew(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME
     options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+    options_out_len = dhcp_option_clientid(options_out_len, msg_out->options, netif);
 #endif /* LWIP_NETIF_HOSTNAME */
 
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_RENEWING, msg_out, DHCP_REQUEST, &options_out_len);
@@ -1236,6 +1244,7 @@ dhcp_rebind(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME
     options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+    options_out_len = dhcp_option_clientid(options_out_len, msg_out->options, netif);
 #endif /* LWIP_NETIF_HOSTNAME */
 
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_REBINDING, msg_out, DHCP_DISCOVER, &options_out_len);
@@ -1293,6 +1302,8 @@ dhcp_reboot(struct netif *netif)
 
 #if LWIP_NETIF_HOSTNAME
     options_out_len = dhcp_option_hostname(options_out_len, msg_out->options, netif);
+        options_out_len = dhcp_option_clientid(options_out_len, msg_out->options, netif);
+
 #endif /* LWIP_NETIF_HOSTNAME */
 
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_REBOOTING, msg_out, DHCP_REQUEST, &options_out_len);
@@ -1497,6 +1508,33 @@ dhcp_option_hostname(u16_t options_out_len, u8_t *options, struct netif *netif)
   }
   return options_out_len;
 }
+
+static u16_t
+dhcp_option_clientid(u16_t options_out_len, u8_t *options, struct netif *netif)
+{
+    int len = 6;
+      size_t available = DHCP_OPTIONS_LEN - options_out_len - 3;
+      LWIP_ASSERT("DHCP: hostname is too long!", 6 <= available);
+      options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_CLIENT_ID, len+1);
+
+    options_out_len = dhcp_option_byte(options_out_len, options, 0x01);
+    uint8_t* p = (uint8_t*) &netif->hwaddr;
+    while (len--) {
+    options_out_len = dhcp_option_byte(options_out_len, options, *p++);
+    }
+
+    len = 4;
+    uint32_t leaseTime = 0xFFFF0000;
+    options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_LEASE_TIME, 4);
+    p = (uint8_t*) &leaseTime;
+    while (len--) {
+    options_out_len = dhcp_option_byte(options_out_len, options, *p++);
+    }
+
+
+  return options_out_len;
+}
+
 #endif /* LWIP_NETIF_HOSTNAME */
 
 /**
