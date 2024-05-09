@@ -28,11 +28,6 @@ int w5500_init() {
 
    w5500_reset();
 
-   //w5500_phycfg_t phycfg;
-   //phycfg.opmode_set = 1;
-   //phycfg.opmode = W5500_PHYCFG_OPMODE_100BT_HALF_AUTO;
-   //w5500_set_PHYCFG(phycfg);
-
    for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
         w5500_set_socket_INTERRUPT(socketNumber, 0xFF);         // reset the interrupt register
         w5500_set_socket_INTMASK(socketNumber, 0xFF);           // set the interrupt mask register to trigger all interrupts
@@ -42,6 +37,12 @@ int w5500_init() {
         w5500_set_socket_COMMAND(socketNumber, W5500_SOCKET_CMD_DISCON); // make sure all sockets are closed
         w5500_set_socket_COMMAND(socketNumber, W5500_SOCKET_CMD_CLOSE); // make sure all sockets are closed
    }
+
+    /*w5500_phycfg_t phycfg;
+    phycfg.opmode_set = 1;
+    phycfg.opmode = W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO;
+    w5500_set_PHYCFG(phycfg);
+    */
 
    return W5500_OK;
 }
@@ -60,6 +61,24 @@ int w5500_reset() {
                 w5500_read_byte(W5500_ADDR_COMMON_MODE, _bsb.common_register, &mr);
         }        
         return W5500_OK;
+}
+
+int w5500_set_phyopmode(uint8_t phyopmode) {
+
+    w5500_phycfg_t phycfg;
+    phycfg.opmode_set = 1;
+    phycfg.opmode = W5500_PHYCFG_OPMODE_100BT_HALF_NOAUTO;
+    phycfg.duplex_status = W5500_PHYCFG_DUPLEX_HALF;
+    phycfg.speed_status = W5500_PHYCFG_SPEED_100MBPS;
+    phycfg.link_status = W5500_PHYCFG_LINKSTATUS_UP;
+    w5500_set_PHYCFG(phycfg);
+
+    int maxTries = 100;
+    do {
+        memset(&phycfg,0,sizeof(w5500_phycfg_t));
+        w5500_get_PHYCFG(&phycfg);
+    } while((phycfg.opmode != phyopmode || phycfg.link_status == W5500_PHYCFG_LINKSTATUS_DOWN)  && maxTries--);
+
 }
 
 

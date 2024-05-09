@@ -93,6 +93,7 @@ int w5500_reset();
 int w5500_dump_state();
 int w5500_socket_write_data(unsigned char  socketNumber,  unsigned char  *buf, unsigned short  size);
 int w5500_socket_read_data(unsigned char  socketNumber,  unsigned char  *buf, unsigned short  size);
+int w5500_set_phyopmode(uint8_t phyopmode);
 
 #define HT_W5500_GET_COMMON_8(__name__)    int w5500_get_##__name__(unsigned char * data); 
 #define HT_W5500_SET_COMMON_8(__name__)    int w5500_set_##__name__(unsigned short data); 

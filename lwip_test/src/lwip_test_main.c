@@ -33,7 +33,7 @@
 #include "../../tsspilib_driver_a2gpio/src/tsspilib_driver_a2gpio.h"
 #endif
 
-uint8_t _hwaddr[]   = { 0x80, 0x70, 0x60, 0x50, 0x40, 0x30 };
+uint8_t _hwaddr[]   = { 0x88, 0x77, 0x66, 0x55, 0x44, 0x33 };
 uint8_t _ipaddr[]   = { 10, 0, 0, 133 };
 uint8_t _mask[]     = { 255, 255, 255, 0 };
 uint8_t _gwaddr[]   = { 10, 0, 0, 1};
@@ -113,7 +113,7 @@ err_t ts_netif_init(struct netif *netif)
     netif->linkoutput = ts_netif_output;
     netif->output     = etharp_output; 
     //netif->output_ip6 = NULL; // NEED FILL IN ethip6_output;
-    netif->mtu        = 1508; // DEFAULT VALUE? ETHERNET_MTU;
+    netif->mtu        = 1500; // DEFAULT VALUE? ETHERNET_MTU;
     netif->flags      = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_ETHERNET | NETIF_FLAG_IGMP | NETIF_FLAG_MLD6;
     MIB2_INIT_NETIF(netif, snmp_ifType_ethernet_csmacd, 100000000);
     return ERR_OK;
@@ -123,19 +123,33 @@ int intmin(int x, int y) {
   return (x < y) ? x : y;
 }
 
+struct ethheader {
+    unsigned char       dsta[6];
+    unsigned char       srca[6];
+    uint16_t            type;
+} ethheader_t;
+
 int initializeLWIP() {
   
     lwip_init();
 pbuf_init();
 
-    netif_add(&_netif, IP4_ADDR_ANY, IP4_ADDR_ANY, IP4_ADDR_ANY, NULL, ts_netif_init, netif_input);
+    ip4_addr_t ipAddress;
+    ipAddress.addr = 0x8600000A;
+    ip4_addr_t subnetMask;
+    subnetMask.addr = 0x00FFFFFF;
+    ip4_addr_t gwAddress;
+    gwAddress.addr = 0x010000A0;
 
+    netif_add(&_netif, &ipAddress, &subnetMask, &gwAddress, NULL, ts_netif_init, netif_input);
+
+    _netif.hostname = "test";
     _netif.name[0] = 'e';
     _netif.name[1] = '0';
 
     SMEMCPY(_netif.hwaddr, _hwaddr, 6);
     _netif.hwaddr_len = 6;
-
+    
     netif_set_status_callback(&_netif, ts_netif_status_callback);
     netif_set_default(&_netif);
     netif_set_up(&_netif);
@@ -143,36 +157,48 @@ pbuf_init();
     
     /* Start DHCP and HTTPD */
     err_t x = dhcp_start(&_netif );
-
+    
     //struct pbuf* buffer = pbuf_alloc(PBUF_RAW, 2048, PBUF_POOL);
     //pbuf_ref(buffer);
     while(1) {
 
 
         _socket->refresh(_socket);
-
-        printf("Avail:%i\n",_socket->rx_bytes_available);
-
         int bytesToRead = _socket->rx_bytes_available;
-        while (bytesToRead) {
-            int chunkSize = intmin(bytesToRead, 1600);
-            _socket->receive(_socket, _mac_read_buffer, chunkSize);
-            struct pbuf* buffer = pbuf_alloc(PBUF_RAW, chunkSize, PBUF_POOL);
-            pbuf_take(buffer, _mac_read_buffer, chunkSize);
-            if(_netif.input(buffer, &_netif) != ERR_OK) {
-                printf("asd\n");
-            }
-            bytesToRead -= chunkSize;
-        }
-        
+        while(bytesToRead) {
+            int bytesRead = _socket->receive(_socket, _mac_read_buffer, bytesToRead);
+            unsigned char *pp = &_mac_read_buffer;
+            while (pp < &_mac_read_buffer[bytesRead]) {
+                uint16_t frameSize = ((pp[0]<<8) | pp[1]) -2;
+                if (frameSize > 1510) goto fastExit;
+                pp+=2;
+                struct ethheader *ethframe = (struct ethheader*) pp;
+                printf("ethframe:%i/%i dest=[%X:%X:%X:%X:%X:%X] src=[%X:%X:%X:%X:%X:%X] type=[%X]\n",frameSize, bytesRead, 
+                    ethframe->dsta[0], ethframe->dsta[1], ethframe->dsta[2], ethframe->dsta[3], ethframe->dsta[4], ethframe->dsta[5], 
+                    ethframe->srca[0], ethframe->srca[1], ethframe->srca[2], ethframe->srca[3], ethframe->srca[4], ethframe->srca[5], 
+                    ethframe->type);
 
+                struct pbuf* buffer = pbuf_alloc(PBUF_RAW, frameSize, PBUF_POOL);
+                pbuf_take(buffer, pp, frameSize);
+                if(_netif.input(buffer, &_netif) != ERR_OK) {
+                    printf("asd\n");
+                }
+                pp += frameSize;
+            }
+            bytesToRead -= bytesRead;
+        }
+fastExit:
+        
+        
         
         /* Check link state, e.g. via MDIO communication with PHY */
         /* Cyclic lwIP timers check */
         sys_check_timeouts();
 
+
         struct dhcp* myaddr = netif_dhcp_data(&_netif);
-        printf("DHCP: state:[%X] server[%X] addr:[%X] gw:[%X] mask:[%X]\n",myaddr->state, myaddr->server_ip_addr.addr, myaddr->offered_gw_addr.addr, myaddr->offered_ip_addr.addr, myaddr->offered_sn_mask.addr);
+        
+        //printf("DHCP: state:[%X] server[%X] addr:[%X] gw:[%X] mask:[%X]\n",myaddr->state, myaddr->server_ip_addr.addr, myaddr->offered_gw_addr.addr, myaddr->offered_ip_addr.addr, myaddr->offered_sn_mask.addr);
             //w5500_dump_state();
         usleep(5000);
 
@@ -206,6 +232,9 @@ int initializeW5500() {
 
     _tslog->info("Resetting W5500\n");
     w5500_reset();
+
+    _tslog->info("Setting PHY opmode to ALL CAPABLE\n");
+    w5500_set_phyopmode(W5500_PHYCFG_OPMODE_100BT_HALF_NOAUTO);
 
     _tslog->info("W5500: Setting MAC\n");
     w5500_set_SRCMAC(_hwaddr);

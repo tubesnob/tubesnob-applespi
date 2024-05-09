@@ -51,7 +51,8 @@ socket_t* socket_create_raw() {
     ss->refresh = &socket_refresh;
     w5500_set_socket_RX_BUFSIZE(ss->number, 0x10);
     w5500_set_socket_TX_BUFSIZE(ss->number, 0x10);
-    w5500_set_socket_MODE(ss->number, W5500_SOCKET_MODE_MACRAW);
+    
+    w5500_set_socket_MODE(ss->number, W5500_SOCKET_MODE_MACRAW | 0b11110000);
     w5500_set_socket_COMMAND(ss->number, W5500_SOCKET_CMD_OPEN);
 
     return ss;
