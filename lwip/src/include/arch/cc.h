@@ -50,7 +50,12 @@
 #endif
 
 #define LWIP_TIMEVAL_PRIVATE 0
+
+#ifdef __APPLE2GS__
+#include <time.h>
+#else
 #include <sys/time.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +67,7 @@ extern "C" {
 #define LWIP_ERRNO_STDINCLUDE	1
 #endif
 
-extern unsigned int lwip_port_rand(void);
+extern unsigned long lwip_port_rand(void);
 #define LWIP_RAND() (lwip_port_rand())
 
 /* different handling for unit test, normally not needed */

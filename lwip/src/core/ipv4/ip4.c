@@ -1,3 +1,6 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 /**
  * @file
  * This is the IPv4 layer implementation for incoming and outgoing IP traffic.

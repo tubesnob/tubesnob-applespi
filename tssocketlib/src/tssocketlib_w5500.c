@@ -1,4 +1,6 @@
-//#pragma noroot
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 
 #include "tssocketlib_w5500.h"
 #include "tssocketlib_w5500_defs.h"
@@ -19,6 +21,7 @@ int w5500_read_mult(int address, unsigned char bsb, unsigned char* data, WORD si
 
 int w5500_init() {
 
+printf("x\n");
    _bsb.common_register = 0x00;
    for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
       _bsb.sockets[socketNumber].socket_register  = ((socketNumber << 2) | 0x01) << 3;
@@ -26,7 +29,10 @@ int w5500_init() {
       _bsb.sockets[socketNumber].socket_rx_buffer = ((socketNumber << 2) | 0x03) << 3;
    }
 
+printf("y\n");
+
    w5500_reset();
+printf("z\n");
 
    for(int socketNumber=0; socketNumber < W5500_MAX_SOCKETS; socketNumber++) {
         w5500_set_socket_INTERRUPT(socketNumber, 0xFF);         // reset the interrupt register
@@ -38,11 +44,14 @@ int w5500_init() {
         w5500_set_socket_COMMAND(socketNumber, W5500_SOCKET_CMD_CLOSE); // make sure all sockets are closed
    }
 
+printf("1\n");
+
     /*w5500_phycfg_t phycfg;
     phycfg.opmode_set = 1;
     phycfg.opmode = W5500_PHYCFG_OPMODE_ALL_CAPABLE_AUTO;
     w5500_set_PHYCFG(phycfg);
     */
+printf("2\n");
 
    return W5500_OK;
 }
@@ -55,9 +64,9 @@ int w5500_close() {
 int w5500_reset() {
         unsigned char mr = 0x80;
         w5500_write_byte(W5500_ADDR_COMMON_MODE, _bsb.common_register, mr);
-
         // wait for the device to actually reset....
         while(mr & 0x80) {
+            mr = 0x00;
                 w5500_read_byte(W5500_ADDR_COMMON_MODE, _bsb.common_register, &mr);
         }        
         return W5500_OK;
@@ -159,7 +168,7 @@ int w5500_socket_read_data(unsigned char socketNumber, unsigned char *buf, WORD 
         w5500_read_mult(index,_bsb.sockets[socketNumber].socket_rx_buffer,buf,size);
         index += size;
         w5500_set_socket_RX_READPTR(socketNumber, index);
-        return size;
+        
 }
 
 
@@ -181,6 +190,10 @@ int w5500_write_mult(int address, unsigned char bsb, unsigned char* data, WORD s
  
         spi_begin_trans();
 
+        #ifdef __APPLE2GS__
+        spi_write(_spi_header_buffer, 3);
+        spi_write(data, size);
+        #else
         WORD outbufsize = 3 + size;
         uint8_t* outbuf = (uint8_t*) malloc(outbufsize);
         if (outbuf) {
@@ -189,6 +202,7 @@ int w5500_write_mult(int address, unsigned char bsb, unsigned char* data, WORD s
             spi_write(outbuf,outbufsize);
             free(outbuf);
         }
+        #endif
         spi_end_trans();
 
         return W5500_OK;

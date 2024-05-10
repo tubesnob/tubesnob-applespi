@@ -1,3 +1,8 @@
+
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
+
 /**
  * @file
  * Application layered TCP connection API (to be used from TCPIP thread)

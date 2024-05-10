@@ -1,4 +1,7 @@
-//#pragma noroot
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
+
 #include <stdio.h>
 
 #include "tsspilib.h"

@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "../../orcadefaults.h"
 
 #ifndef __TSSOCKETLIB_DOT_H__

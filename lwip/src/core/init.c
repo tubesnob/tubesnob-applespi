@@ -1,3 +1,6 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 /**
  * @file
  * Modules initialization
@@ -342,49 +345,90 @@ void
 lwip_init(void)
 {
 #ifndef LWIP_SKIP_CONST_CHECK
+printf("Skip const check\n");
   int a = 0;
   LWIP_UNUSED_ARG(a);
+printf("Skip const check 2\n");
   LWIP_ASSERT("LWIP_CONST_CAST not implemented correctly. Check your lwIP port.", LWIP_CONST_CAST(void *, &a) == &a);
+  printf("Skip const check 3\n");
+
 #endif
 #ifndef LWIP_SKIP_PACKING_CHECK
+printf("Skip packing check\n");
+
   LWIP_ASSERT("Struct packing not implemented correctly. Check your lwIP port.", sizeof(struct packed_struct_test) == PACKED_STRUCT_TEST_EXPECTED_SIZE);
+  printf("Skip packing check 2\n");
+
 #endif
+
+printf("stats\n");
 
   /* Modules initialization */
   stats_init();
 #if !NO_SYS
+
+  printf("sys\n");
   sys_init();
 #endif /* !NO_SYS */
+  printf("mem\n");
   mem_init();
+
+  printf("memp\n");
   memp_init();
+
+  printf("pbuf\n");
   pbuf_init();
+
+  printf("netif\n");
   netif_init();
+
+  
 #if LWIP_IPV4
+printf("ipv4\n");
+
   ip_init();
 #if LWIP_ARP
+printf("etharp\n");
   etharp_init();
 #endif /* LWIP_ARP */
 #endif /* LWIP_IPV4 */
 #if LWIP_RAW
+printf("raw\n");
+
   raw_init();
 #endif /* LWIP_RAW */
 #if LWIP_UDP
+printf("udp\n");
+
   udp_init();
 #endif /* LWIP_UDP */
 #if LWIP_TCP
+printf("tcp\n");
+
   tcp_init();
 #endif /* LWIP_TCP */
 #if LWIP_IGMP
+printf("igmp\n");
+
   igmp_init();
 #endif /* LWIP_IGMP */
 #if LWIP_DNS
+printf("dns\n");
+
   dns_init();
 #endif /* LWIP_DNS */
 #if PPP_SUPPORT
+printf("ppp\n");
+
   ppp_init();
 #endif
 
 #if LWIP_TIMERS
+printf("timers\n");
+
   sys_timeouts_init();
 #endif /* LWIP_TIMERS */
+
+printf("all done\n");
+
 }

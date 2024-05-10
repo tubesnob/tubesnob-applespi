@@ -1,3 +1,6 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 /**
  * @file
  * Common IPv4 and IPv6 code
@@ -62,7 +65,6 @@
 
 /** Global data for both IPv4 and IPv6 */
 struct ip_globals ip_data;
-
 #if LWIP_IPV4 && LWIP_IPV6
 
 const ip_addr_t ip_addr_any_type = IPADDR_ANY_TYPE_INIT;

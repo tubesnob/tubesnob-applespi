@@ -1,3 +1,9 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
+
+#define DODATADUMP 0
+
 #include "../../orcadefaults.h"
 #include "../../tslib/src/tslib.h"
 #include "../../tsspilib/src/tsspilib.h"
@@ -53,11 +59,38 @@ int a2gpio_spi_end_trans() {
 }
 
 int a2gpio_spi_write(uint8_t *txbuf, uint16_t txsize) {
-    return spisendb(txbuf, txsize);
+
+    uint16_t rv = spisendb(txbuf, txsize);
+
+    #if DODATADUMP
+    printf("S[%04X][",txsize);
+    for(int x=0; x < txsize; x++) {
+        if (x>0)
+            printf(":");
+        printf("%02X", txbuf[x]);
+    }
+    printf("][%04X]\n",rv);
+    #endif
+
+    return rv;
 }
 
 int a2gpio_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
-    return spireadb(rxbuf, rxsize);
+
+
+    uint16_t rv = spireadb(rxbuf, rxsize);
+
+    #if DODATADUMP
+    printf("R[%04X][",rxsize);
+    for(int x=0; x < rxsize; x++) {
+        if (x>0)
+            printf(":");
+        printf("%02X", rxbuf[x]);
+    }
+    printf("][%04X]\n",rv);
+    #endif
+
+    return rv;
 }
 
 void dumpvals(const char *header, tsspilib_device_vtbl_t* vtbl) {

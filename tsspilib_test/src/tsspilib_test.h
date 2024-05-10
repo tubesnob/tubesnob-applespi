@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 
 #include "../../orcadefaults.h"
 #include "../../tslib/src/tslib.h"

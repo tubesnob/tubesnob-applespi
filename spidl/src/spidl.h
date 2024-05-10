@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <stdint.h>
 
 #ifndef __SPIDL_DOT_H__
 #define __SPIDL_DOT_H__

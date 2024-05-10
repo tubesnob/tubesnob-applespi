@@ -1,6 +1,6 @@
 BINDIR=../bin
 TARGET=lwip_test_main
-SRC=lwip_test_main.c
+SRC=utils.c init_lwip.c init_sockets.c init_spi.c init_w5500.c lwip_test_main.c 
 OBJ=$(SRC:.c=.o)
 
 ifeq ($(DOIIX), true)
@@ -23,14 +23,14 @@ endif
 
 %.o: %.c
 ifeq ($(DOIIX), true)
-	$(CC) $(CCOPTS) $< 
+	$(CC) $(CCOPTS) $< cc=-i"../../lwip/src/include/" cc=-i"../../lwip/src/" cc=-i"../../lwip/src/include/"
 else
 	$(CC) $(CCOPTS) $< $(LINKDEPS) -o $(BINDIR)/$(TARGET) -I ../../lwip/src/include/ -I ../../lwip/src/ -I ../../lwip/src/include/
 endif
 
 clean:
 	@echo "Cleaning"
-	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
+	@$(RM) -dR $(BINDIR) $(TARGET) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT *.a.a
 
 $(BINDIR):
 	@mkdir $(BINDIR)

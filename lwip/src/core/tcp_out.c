@@ -1,3 +1,6 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 /**
  * @file
  * Transmission Control Protocol, outgoing traffic
@@ -1558,7 +1561,7 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
   seg->p->len -= len;
   seg->p->tot_len -= len;
 
-  seg->p->payload = seg->tcphdr;
+  seg->p->payload = (unsigned char *) seg->tcphdr;
 
   seg->tcphdr->chksum = 0;
 

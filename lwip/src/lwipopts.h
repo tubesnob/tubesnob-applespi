@@ -38,12 +38,15 @@
 #ifndef LWIP_LWIPOPTS_H
 #define LWIP_LWIPOPTS_H
 
+
+#ifdef __APPLE2GS__
+//#pragma noroot
+#endif
+
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you don't like!
  */
-#include "lwipopts.h"
-//#include "lwip/debug.h"
 
 /*
    -----------------------------------------------
@@ -75,7 +78,7 @@
  *    4 byte alignment -> #define MEM_ALIGNMENT 4
  *    2 byte alignment -> #define MEM_ALIGNMENT 2
  */
-#define MEM_ALIGNMENT                   1U
+#define MEM_ALIGNMENT                   2U
 
 /**
  * MEM_SIZE: the size of the heap memory. If the application will send
@@ -93,7 +96,7 @@
  * If the application sends a lot of data out of ROM (or other static memory),
  * this should be set high.
  */
-#define MEMP_NUM_PBUF                   16
+#define MEMP_NUM_PBUF                   1
 
 /**
  * MEMP_NUM_RAW_PCB: Number of raw connection PCBs

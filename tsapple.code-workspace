@@ -15,7 +15,9 @@
             "string.h": "c",
             "tsspilib_driver_a2gpio.h": "c",
             "locale": "c",
-            "string": "c"
+            "string": "c",
+            "tsspilib.h": "c",
+            "lwip_test.h": "c"
         }
     },
     "launch": {

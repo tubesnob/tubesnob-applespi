@@ -1,4 +1,6 @@
-//#pragma noroot
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 
 /* Getopt for GNU.
    NOTE: getopt is now part of the C library, so if you don't know what

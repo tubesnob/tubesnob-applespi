@@ -33,7 +33,7 @@ endif
 %.ROOT: %.asm
 	@echo "Compiling ASM ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-	$(CC) $(CCOPTS) $< cc=-DAPPLE2GS
+	$(CC) $(CCOPTS) $< cc=-D__APPLE2GS__
 else
 	$(CC) $(CCOPTS) -c $< -o $@
 endif

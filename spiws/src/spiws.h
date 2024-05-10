@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "../../tslib/src/tslib.h"
 #include "../../tsspilib/src/tsspilib.h"

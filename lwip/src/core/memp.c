@@ -1,3 +1,6 @@
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 /**
  * @file
  * Dynamic pool memory manager
@@ -175,26 +178,38 @@ void
 memp_init_pool(const struct memp_desc *desc)
 {
 #if MEMP_MEM_MALLOC
+printf("mempinit-a\n");
   LWIP_UNUSED_ARG(desc);
 #else
+printf("mempinit-b\n");
   int i;
   struct memp *memp;
 
   *desc->tab = NULL;
   memp = (struct memp *)LWIP_MEM_ALIGN(desc->base);
+  printf("mempinit-b\n");
+
 #if MEMP_MEM_INIT
   /* force memset on pool memory */
+  printf("mempinit-c\n");
+
   memset(memp, 0, (size_t)desc->num * (MEMP_SIZE + desc->size
 #if MEMP_OVERFLOW_CHECK
                                        + MEM_SANITY_REGION_AFTER_ALIGNED
 #endif
                                       ));
 #endif
+printf("mempinit-d\n");
+
   /* create a linked list of memp elements */
   for (i = 0; i < desc->num; ++i) {
+    printf("mempinit-e%i\n",i);
+
     memp->next = *desc->tab;
     *desc->tab = memp;
 #if MEMP_OVERFLOW_CHECK
+printf("mempinit-j\n");
+
     memp_overflow_init_element(memp, desc);
 #endif /* MEMP_OVERFLOW_CHECK */
     /* cast through void* to get rid of alignment warnings */
@@ -204,14 +219,22 @@ memp_init_pool(const struct memp_desc *desc)
 #endif
                                   );
   }
+  printf("mempinit-k\n");
+
 #if MEMP_STATS
+printf("mempinit-l\n");
+
   desc->stats->avail = desc->num;
 #endif /* MEMP_STATS */
 #endif /* !MEMP_MEM_MALLOC */
 
 #if MEMP_STATS && (defined(LWIP_DEBUG) || LWIP_STATS_DISPLAY)
+printf("mempinit-m\n");
+
   desc->stats->name  = desc->desc;
 #endif /* MEMP_STATS && (defined(LWIP_DEBUG) || LWIP_STATS_DISPLAY) */
+printf("mempinit-n\n");
+
 }
 
 /**
@@ -223,20 +246,29 @@ memp_init_pool(const struct memp_desc *desc)
 void
 memp_init(void)
 {
+    printf("mempinit1\n");
   u16_t i;
 
   /* for every pool: */
   for (i = 0; i < LWIP_ARRAYSIZE(memp_pools); i++) {
+        printf("mempinit2-%i\n",i);
+
     memp_init_pool(memp_pools[i]);
+        printf("mempinit2-%i-done\n",i);
+
 
 #if LWIP_STATS && MEMP_STATS
+        printf("mempinit2-%i-stats\n",i);
+
     lwip_stats.memp[i] = memp_pools[i]->stats;
 #endif
   }
 
 #if MEMP_OVERFLOW_CHECK >= 2
   /* check everything a first time to see if it worked */
+        printf("mempinit3\n",i);
   memp_overflow_check_all();
+        printf("mempinit4\n",i);
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 }
 

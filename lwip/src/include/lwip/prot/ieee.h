@@ -49,6 +49,43 @@ extern "C" {
  * @ingroup ieee
  * A list of often ethtypes (although lwIP does not use all of them).
  */
+
+#ifdef __APPLE2GS__
+
+  #define ETHTYPE_IP         0x0800U
+  /** Address resolution protocol */
+  #define ETHTYPE_ARP        0x0806U
+  /** Wake on lan */
+  #define ETHTYPE_WOL        0x0842U
+  /** RARP */
+  #define ETHTYPE_RARP       0x8035U
+  /** Virtual local area network */
+  #define ETHTYPE_VLAN       0x8100U
+  /** Internet protocol v6 */
+  #define ETHTYPE_IPV6       0x86DDU
+  /** PPP Over Ethernet Discovery Stage */
+  #define ETHTYPE_PPPOEDISC  0x8863U
+  /** PPP Over Ethernet Session Stage */
+  #define ETHTYPE_PPPOE      0x8864U
+  /** Jumbo Frames */
+  #define ETHTYPE_JUMBO      0x8870U
+  /** Process field network */
+  #define ETHTYPE_PROFINET   0x8892U
+  /** Ethernet for control automation technology */
+  #define ETHTYPE_ETHERCAT   0x88A4U
+  /** Link layer discovery protocol */
+  #define ETHTYPE_LLDP       0x88CCU
+  /** Serial real-time communication system */
+  #define ETHTYPE_SERCOS     0x88CDU
+  /** Media redundancy protocol */
+  #define ETHTYPE_MRP        0x88E3U
+  /** Precision time protocol */
+  #define ETHTYPE_PTP        0x88F7U
+  /** Q-in-Q, 802.1ad */
+  #define ETHTYPE_QINQ       0x9100U
+
+#else
+
 enum lwip_ieee_eth_type {
   /** Internet protocol v4 */
   ETHTYPE_IP        = 0x0800U,
@@ -83,6 +120,8 @@ enum lwip_ieee_eth_type {
   /** Q-in-Q, 802.1ad */
   ETHTYPE_QINQ      = 0x9100U
 };
+
+#endif
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,6 @@
-//#pragma noroot
+#ifdef __APPLE2GS__
+segment "AUTOSEG~~~";
+#endif
 
 /* inih -- simple .INI file parser
 

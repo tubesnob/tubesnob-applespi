@@ -1,6 +1,10 @@
 include Filelists.mk
 LWIPDIR=.
-LWIPBASEFILES=$(LWIPNOAPPSFILES)
+#LWIPBASEFILES=$(LWIPNOAPPSFILES)
+LWIPBASEFILES=$(COREFILES) \
+	$(CORE4FILES) \
+	$(NETIFFILES) \
+
 #$(COREFILES) \
 #	$(CORE4FILES) \
 #	$(NETIFFILES) \
@@ -12,11 +16,6 @@ SRC=$(LWIPBASEFILES)
 OBJ=$(SRC:.c=.o)
 
 include ../../Makefile.env.include
-
-
-#$(COREFILES) \
-#	$(CORE4FILES) \
-#	$(NETIFFILES)
 
 all: clean $(TARGET)
 	@echo $(LWIPBASEFILES)
@@ -35,14 +34,15 @@ endif
 %.o: %.c
 	@echo "Compiling C ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-	$(CC) $(CCOPTS) $<
+	$(eval TRX=$(subst .o,,$@))
+	$(CC) $(CCOPTS) $< keep=$(TRX) cc=-i"$(LWIPDIR)/include/" cc=-i"$(LWIPDIR)/"
 else
 	$(CC) $(CCOPTS) -c $< -o $@ -I $(LWIPDIR)/include/ -I $(LWIPDIR)/
 endif
 
 clean:
 	@echo "Cleaning"
-	@$(RM) -dR $(BINDIR) $(TARGET) $(OBJ) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT
+	@$(RM) -dR $(BINDIR) $(TARGET) $(OBJ) *.dSYM *.o *.o.a *.o.ROOT *.a *.root *.sym *.ROOT *.a.a
 
 $(BINDIR):
 	@mkdir $(BINDIR)

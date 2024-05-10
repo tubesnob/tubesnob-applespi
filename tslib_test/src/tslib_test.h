@@ -2,6 +2,7 @@
 #define __TSTEST_DOT_H__
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include "../../tslib/src/tslib.h"
 
