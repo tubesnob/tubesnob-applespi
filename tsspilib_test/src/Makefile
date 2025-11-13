@@ -6,7 +6,7 @@ OBJ=$(SRC:.c=.o)
 ifeq ($(DOIIX), true)
 LINKDEPS=../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o ../../tsspilib_driver_a2gpio/bin/tsspilib_driver_a2gpio.o
 else
-LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o ../../tsspilib_driver_ftdi/bin/tsspilib_driver_ftdi.o
+LINKDEPS=/opt/homebrew/Cellar/libftdi/1.5_2/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o ../../tsspilib_driver_ftdi/bin/tsspilib_driver_ftdi.o
 endif 
 
 include ../../Makefile.env.include

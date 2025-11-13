@@ -1,14 +1,8 @@
+	
 BINDIR=../bin
-TARGET=tsspilib_driver_ftdi.o
-
-ifeq ($(DOIIX), true)
-else
-#LINKDEPS=/usr/local/lib/libftdi1.dylib 
-LINKDEPS=/opt/homebrew/Cellar/libftdi/1.5_2/lib/libftdi1.dylib
-
-SRC=tsspilib_ftdi_main.c
-OBJ=tsspilib_ftdi_main.o
-endif 
+TARGET=tsiplib.o
+SRC=arp.c dhcp.c ethernet.c hal.c icmp.c ip.c tcpip.c udp.c
+OBJ=$(SRC:.c=.o)
 
 include ../../Makefile.env.include
 
@@ -17,12 +11,11 @@ all: clean $(TARGET)
 $(TARGET): dirs $(OBJ)
 		@echo "Linking ($@) with ($^) DOIIX=$(DOIIX)"
 ifeq ($(DOIIX), true)
-		@echo Nothing to do
-		@#$(eval TRX=$(addprefix +,$(OBJ)))
-		@#$(eval TRX2=$(TRX:.o=.a))
-		@#$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(TRX2)
+		$(eval TRX=$(addprefix +,$(OBJ)))
+		$(eval TRX2=$(TRX:.o=.a))
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(TRX2)
 else
-		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(OBJ) $(LINKDEPS)
+		$(MAKELIB) $(MAKELIBOPTS) $(BINDIR)/$(TARGET) $(OBJ)
 endif
 
 %.o: %.c

@@ -6,7 +6,8 @@ OBJ=$(SRC:.c=.o)
 ifeq ($(DOIIX), true)
 LINKDEPS=../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o 
 else
-LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o 
+#LINKDEPS=/usr/local/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o 
+LINKDEPS=/opt/homebrew/Cellar/libftdi/1.5_2/lib/libftdi1.dylib ../../tslib/bin/tslib.o ../../tsspilib/bin/tsspilib.o 
 endif 
 
 include ../../Makefile.env.include
