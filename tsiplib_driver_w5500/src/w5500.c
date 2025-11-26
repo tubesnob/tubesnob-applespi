@@ -2,8 +2,8 @@
 segment "AUTOSEG~~~";
 #endif
 
-#include "tssocketlib_w5500.h"
-#include "tssocketlib_w5500_defs.h"
+#include "w5500.h"
+#include "w5500_defs.h"
 #include "../../tslib/src/tslib.h"
 #include "../../tsspilib/src/tsspilib.h"
 #include "../../orcadefaults.h"

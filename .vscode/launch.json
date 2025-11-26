@@ -4,6 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+          {
+            "name": "IPLIB_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/tsiplib_test/bin/tsiplib_test",
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/tsiplib_test",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "BUILD ALL"
+        },
         {
             "name": "SPIDL_TEST",
             "type": "cppdbg",
@@ -66,7 +78,20 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
+          },          
+          {
+            "name": "TSIPLIB_TEST",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/tsiplib_test/bin/tsiplib_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/tsiplib_test/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
           }
+
 
     ]
 }

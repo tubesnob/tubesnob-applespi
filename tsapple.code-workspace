@@ -17,7 +17,8 @@
             "locale": "c",
             "string": "c",
             "tsspilib.h": "c",
-            "lwip_test.h": "c"
+            "lwip_test.h": "c",
+            "tsspilib_driver_ftdi.h": "c"
         }
     },
     "launch": {

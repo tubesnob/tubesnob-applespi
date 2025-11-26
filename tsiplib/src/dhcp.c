@@ -1,8 +1,7 @@
-#include "dhcp.h"
-#include "udp.h"
-#include "ip.h"
-#include "hal.h"
+#include "tsiplib.h"
 #include <string.h>
+
+extern net_driver_t* _driver;
 
 /* DHCP message types */
 #define DHCP_MSG_DISCOVER   1
@@ -95,8 +94,9 @@ bool dhcp_start(void)
     /* Set receive callback */
     udp_socket_set_rx_callback(dhcp_socket, dhcp_rx_callback);
     
+    
     /* Generate transaction ID from MAC address */
-    hal_get_mac_addr(&mac);
+    _driver->get_mac_addr(&mac);
     transaction_id = (mac.addr[2] << 24) | (mac.addr[3] << 16) | 
                      (mac.addr[4] << 8) | mac.addr[5];
     
@@ -280,7 +280,7 @@ static bool dhcp_send_discover(void)
     msg.flags = htons(0x8000);  /* Broadcast flag */
     
     /* Set hardware address */
-    hal_get_mac_addr(&mac);
+    _driver->get_mac_addr(&mac);
     memcpy(msg.chaddr, mac.addr, ETH_ADDR_LEN);
     
     /* Add magic cookie */
@@ -317,7 +317,7 @@ static bool dhcp_send_request(void)
     msg.flags = htons(0x8000);  /* Broadcast flag */
     
     /* Set hardware address */
-    hal_get_mac_addr(&mac);
+    _driver->get_mac_addr(&mac);
     memcpy(msg.chaddr, mac.addr, ETH_ADDR_LEN);
     
     /* Add magic cookie */

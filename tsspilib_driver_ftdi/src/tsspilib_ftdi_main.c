@@ -210,7 +210,7 @@ static int ftdi_spi_read(uint8_t* rxbuf, uint16_t rxsize) {
     FTDI_HANDLE_ERROR_FATAL(retval,"SPI_READ:READ_DATA",0)
     if (retval != rxsize) {
             printf("FTDI: SPI_READ:READ_DATA should have read %i bytes, but only read %i instead.\n",rxsize,retval);
-            return 0;
+            return rxsize;
     }
     return rxsize;
 }

@@ -1,7 +1,7 @@
 	
 BINDIR=../bin
 TARGET=tsiplib.o
-SRC=arp.c dhcp.c ethernet.c hal.c icmp.c ip.c tcpip.c udp.c
+SRC=arp.c dhcp.c ethernet.c icmp.c ip.c tcpip.c udp.c
 OBJ=$(SRC:.c=.o)
 
 include ../../Makefile.env.include

@@ -1,88 +1,95 @@
-#include "tcpip.h"
+#include "tsiplib.h"
 #include <string.h>
 
 /* Stack state */
-static bool initialized = false;
+static bool _initialized = false;
+static tsiplib_config_t* _config;
+net_driver_t* _driver;
 
-bool tcpip_init(net_driver_t *driver)
+bool tcpip_init(net_driver_t *driver, tsiplib_config_t* config)
 {
-    if (initialized || !driver) {
+    _config = config;
+    _driver = driver;
+
+    if (_initialized || !driver) {
         return false;
     }
     
-    /* Set hardware driver */
-    net_driver = driver;
-    
-    /* Initialize HAL */
-    if (!hal_init()) {
-        return false;
+    if (_config->enable_ethernet) {
+        if (!eth_init()) {
+            return false;
+        }
     }
     
-    /* Initialize Ethernet layer */
-    if (!eth_init()) {
-        return false;
+    if (_config->enable_arp && _config->enable_ethernet) { 
+        if (!arp_init()) {
+                return false;
+        }
+    } 
+    
+    if (_config->enable_ip && _config->enable_ethernet) {
+        if (!ip_init()) {
+            return false;
+        }
     }
     
-    /* Initialize ARP */
-    if (!arp_init()) {
-        return false;
+    if (_config->enable_icmp && _config->enable_ip && _config->enable_ethernet) {
+        if (!icmp_init()) {
+            return false;
+        }
     }
     
-    /* Initialize IP layer */
-    if (!ip_init()) {
-        return false;
+    if (_config->enable_udp && _config->enable_ip && _config->enable_ethernet) {
+        if (!udp_init()) {
+            return false;
+        }
     }
     
-    /* Initialize ICMP */
-    if (!icmp_init()) {
-        return false;
+    if (_config->enable_dhcp && _config->enable_ip && _config->enable_ethernet) {
+        if (!dhcp_init()) {
+            return false;
+        }
     }
     
-    /* Initialize UDP */
-    if (!udp_init()) {
-        return false;
-    }
-    
-    /* Initialize DHCP */
-    if (!dhcp_init()) {
-        return false;
-    }
-    
-    initialized = true;
+    _initialized = true;
+
     return true;
 }
 
 void tcpip_poll(void)
 {
-    if (!initialized) {
+    if (!_initialized) {
         return;
     }
     
     /* Poll Ethernet layer for incoming packets */
-    eth_poll();
+    if (_config->enable_ethernet) {
+        eth_poll();
+    }
     
     /* Poll DHCP if active */
-    dhcp_poll();
+    if (_config->enable_dhcp) {
+        dhcp_poll();
+    }
 }
 
 void tcpip_shutdown(void)
 {
-    if (!initialized) {
+    if (!_initialized) {
         return;
     }
-    
-    /* Stop DHCP if running */
-    dhcp_stop();
-    
-    /* Clear ARP cache */
-    arp_cache_flush();
-    
-    initialized = false;
+    if (_config->enable_dhcp) {
+        dhcp_stop();
+    }
+    if (_config->enable_arp) {
+        arp_cache_flush();
+    }
+    _initialized = false;
 }
 
 bool tcpip_set_ip_config(const ip_addr_t *ip, const ip_addr_t *netmask, const ip_addr_t *gateway)
 {
-    if (!initialized || !ip || !netmask || !gateway) {
+    if (!_initialized || !ip || !netmask || !gateway) {
         return false;
     }
     
@@ -95,7 +102,7 @@ bool tcpip_set_ip_config(const ip_addr_t *ip, const ip_addr_t *netmask, const ip
 
 bool tcpip_get_ip_config(ip_addr_t *ip, ip_addr_t *netmask, ip_addr_t *gateway)
 {
-    if (!initialized || !ip || !netmask || !gateway) {
+    if (!_initialized || !ip || !netmask || !gateway) {
         return false;
     }
     
@@ -109,13 +116,13 @@ bool tcpip_get_ip_config(ip_addr_t *ip, ip_addr_t *netmask, ip_addr_t *gateway)
 void tcpip_get_mac_address(eth_addr_t *mac)
 {
     if (mac) {
-        hal_get_mac_addr(mac);
+        _driver->get_mac_addr(mac);
     }
 }
 
 bool tcpip_is_link_up(void)
 {
-    return hal_link_up();
+    return _driver->get_link_status();
 }
 
 bool ip_addr_from_str(const char *str, ip_addr_t *addr)

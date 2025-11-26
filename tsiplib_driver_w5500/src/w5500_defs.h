@@ -1,8 +1,8 @@
 
-#ifndef __TSSOCKETLIBLIB_W5500_DEFS_DOT_C__
-#define __TSSOCKETLIBLIB_W5500_DEFS_DOT_C__
+#ifndef __TSIPLIB_W5500_DEFS_DOT_C__
+#define __TSIPLIB_W5500_DEFS_DOT_C__
 
-#include "tssocketlib_w5500.h"
+#include "w5500.h"
 
 #define W5500_RWB_READ  (0x00 << 2)
 #define W5500_RWB_WRITE (0x01 << 2)

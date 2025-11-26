@@ -122,6 +122,57 @@ void tslog_shutdown();
 extern tslog_vtbl_t* _tslog;
 
 //////////////////////////////////////
+// TSRINGBUF
+//////////////////////////////////////
+
+/* Ring buffer element structure */
+typedef struct {
+    uint8_t *data;      /* Pointer to data */
+    size_t len;         /* Length of data */
+    size_t capacity;    /* Allocated capacity for this element */
+    bool valid;         /* Is this slot valid? */
+} tsringbuf_element_t;
+
+/* Ring buffer structure with embedded vtbl */
+typedef struct tsringbuf_t {
+    /* Data members */
+    tsringbuf_element_t *elements;  /* Array of elements */
+    size_t capacity;                /* Maximum number of elements */
+    size_t max_element_size;        /* Maximum size for any single element */
+    size_t write_idx;               /* Next position to write */
+    size_t read_idx;                /* Next position to read */
+    size_t count;                   /* Number of valid elements */
+    
+    /* Method pointers - each instance has its own vtbl */
+    void (*destroy)(struct tsringbuf_t **ring);
+    void (*init)(struct tsringbuf_t *ring);
+    bool (*is_full)(const struct tsringbuf_t *ring);
+    bool (*is_empty)(const struct tsringbuf_t *ring);
+    size_t (*count_fn)(const struct tsringbuf_t *ring);
+    size_t (*available)(const struct tsringbuf_t *ring);
+    bool (*push)(struct tsringbuf_t *ring, const uint8_t *data, size_t len);
+    bool (*pop)(struct tsringbuf_t *ring, uint8_t *data, size_t max_len, size_t *actual_len);
+    bool (*peek)(const struct tsringbuf_t *ring, uint8_t *data, size_t max_len, size_t *actual_len);
+    void (*clear)(struct tsringbuf_t *ring);
+} tsringbuf_t;
+
+/* Factory function to create new ring buffer instances */
+tsringbuf_t* tsringbuf_create(size_t capacity, size_t max_element_size);
+
+/* Direct function prototypes - these work on any ring buffer instance */
+void tsringbuf_destroy(tsringbuf_t *ring);
+void tsringbuf_init_buffer(tsringbuf_t *ring);
+bool tsringbuf_is_full(const tsringbuf_t *ring);
+bool tsringbuf_is_empty(const tsringbuf_t *ring);
+size_t tsringbuf_count(const tsringbuf_t *ring);
+size_t tsringbuf_available(const tsringbuf_t *ring);
+bool tsringbuf_push(tsringbuf_t *ring, const uint8_t *data, size_t len);
+bool tsringbuf_pop(tsringbuf_t *ring, uint8_t *data, size_t max_len, size_t *actual_len);
+bool tsringbuf_peek(const tsringbuf_t *ring, uint8_t *data, size_t max_len, size_t *actual_len);
+void tsringbuf_clear(tsringbuf_t *ring);
+
+
+//////////////////////////////////////
 // TSLIB
 //////////////////////////////////////
 

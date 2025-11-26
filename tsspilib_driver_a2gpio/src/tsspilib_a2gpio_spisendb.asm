@@ -9,7 +9,7 @@
                 keep tsspilib_asm_spisendb
 
 ******************************************************************
-* spisendb(DWORD *buffer, WORD bytecount);
+* spisendb(uint32_t *buffer, uint16_t bytecount);
 * 
 * sends [bytecount] bytes to SPI device from the buffer
 * returns the number of bytes sent

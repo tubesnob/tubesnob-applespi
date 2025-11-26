@@ -1,7 +1,7 @@
-#include "arp.h"
-#include "ethernet.h"
-#include "hal.h"
+#include "tsiplib.h"
 #include <string.h>
+
+extern net_driver_t* _driver;
 
 /* ARP cache entry */
 typedef struct {
@@ -177,8 +177,7 @@ static bool arp_send(uint16_t opcode, const eth_addr_t *target_mac, const ip_add
     arp_header_t arp;
     eth_addr_t our_mac;
     
-    /* Get our MAC address */
-    hal_get_mac_addr(&our_mac);
+    _driver->get_mac_addr(&our_mac);
     
     /* Build ARP packet */
     arp.hw_type = htons(ARP_HW_TYPE_ETH);

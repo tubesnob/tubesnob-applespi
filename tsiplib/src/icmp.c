@@ -1,6 +1,7 @@
-#include "icmp.h"
-#include "ip.h"
+#include "tsiplib.h"
 #include <string.h>
+
+extern net_driver_t* _driver;
 
 /* Echo reply callback */
 static icmp_echo_callback_t echo_callback = NULL;

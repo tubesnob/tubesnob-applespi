@@ -1,6 +1,7 @@
-#include "udp.h"
-#include "ip.h"
+#include "tsiplib.h"
 #include <string.h>
+
+extern net_driver_t* _driver;
 
 /* Maximum number of UDP sockets */
 #define MAX_UDP_SOCKETS 8

@@ -5,11 +5,16 @@
 #pragma ignore 0x0018
 #pragma memorymodel 1
 
+/* Boolean type */
+typedef unsigned char  bool;
+#define true  1
+#define false 0
+
+/* NULL definition */
 #ifndef NULL
-#define NULL 0
+#define NULL ((void*)0)
 #endif
 
-#define null
 static int __useTimeTool = 0;
 
 #ifdef __APPLE2GS__

@@ -9,7 +9,7 @@
                 keep tsspilib_asm_spireadb
                 
 ******************************************************************
-* spireadb(DWORD *buffer, WORD bytecount);
+* spireadb(uint32_t *buffer, uint16_t bytecount);
 * 
 * reads [bytecount] bytes from SPI device, places 
 * them in [buffer] and returns the number of bytes

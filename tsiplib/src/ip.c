@@ -1,7 +1,8 @@
-#include "ip.h"
-#include "ethernet.h"
-#include "arp.h"
+#include "tsiplib.h"
 #include <string.h>
+
+extern net_driver_t* _driver;
+
 
 /* IP configuration */
 static ip_addr_t our_ip = {{0, 0, 0, 0}};
@@ -90,7 +91,7 @@ void ip_set_address(const ip_addr_t *addr)
 {
     if (addr) {
         ip_addr_copy(&our_ip, addr);
-        /* Announce new IP via ARP */
+        _driver->set_ip_addr(&our_ip);
         arp_announce(&our_ip);
     }
 }
@@ -106,6 +107,7 @@ void ip_set_netmask(const ip_addr_t *mask)
 {
     if (mask) {
         ip_addr_copy(&netmask, mask);
+        _driver->set_subnet_mask(&netmask);
     }
 }
 
@@ -120,6 +122,7 @@ void ip_set_gateway(const ip_addr_t *gw)
 {
     if (gw) {
         ip_addr_copy(&gateway, gw);
+        _driver->set_gateway_addr(&gateway);
     }
 }
 
